@@ -1,0 +1,20 @@
+- PreClip problem (points are missing at higher zoom)
+- Mixin problem (rod)
+- Null segment problem (important for spars), spar segments
+- round planform numbers
+- negative kerf
+- sheeting
+- planform area / path
+- default settings
+- spar compensation
+- save view options
+- tail cuts (inverse kerf)
+
+DONE:
+
+- washout
+- invert
+- correct reverse path algorithm
+- simplify sweep
+- tappered run in/out - avoid long stay of wire in bigger part
+- reorient spar position from LE

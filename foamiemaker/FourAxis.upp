@@ -1,0 +1,35 @@
+uses
+	CtrlLib,
+	Painter;
+
+file
+	Hot4d.h,
+	Util.cpp,
+	Spar.cpp,
+	Airfoil.cpp,
+	Kerf.cpp,
+	Mix.cpp,
+	Path.cpp,
+	View.cpp,
+	Bar.cpp,
+	File.cpp,
+	main.cpp,
+	dlg.lay,
+	HotImg.iml,
+	Jobs readonly separator,
+	todo.txt,
+	airfoils\rough.dat,
+	airfoils\s3021.dat,
+	airfoils\ag24.dat,
+	Rod.cpp,
+	Angle.cpp,
+	Text.cpp,
+	Wing.cpp,
+	FusePlan.cpp,
+	FuseProfile.cpp,
+	Motor.cpp,
+	TextPath.cpp;
+
+mainconfig
+	"" = "GUI";
+
