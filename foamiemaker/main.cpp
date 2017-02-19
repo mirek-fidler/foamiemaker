@@ -1,7 +1,7 @@
 #include "Hot4d.h"
 
 #define IMAGECLASS HotImg
-#define IMAGEFILE <FourAxis/HotImg.iml>
+#define IMAGEFILE <FoamieMaker/HotImg.iml>
 #include <Draw/iml_source.h>
 
 void FourAxisDlg::AddShape(Shape *l, Shape *r)

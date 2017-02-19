@@ -6,11 +6,11 @@
 
 using namespace Upp;
 
-#define LAYOUTFILE <FourAxis/dlg.lay>
+#define LAYOUTFILE <FoamieMaker/dlg.lay>
 #include <CtrlCore/lay.h>
 
 #define IMAGECLASS HotImg
-#define IMAGEFILE <FourAxis/HotImg.iml>
+#define IMAGEFILE <FoamieMaker/HotImg.iml>
 #include <Draw/iml_header.h>
 
 struct Pt : Moveable<Pt, Pointf> {
