@@ -18,6 +18,8 @@ struct Pt : Moveable<Pt, Pointf> {
 	bool   sharp = false; // kerf angle is sharp (e.g. in rectangular spar)
 	int    segment = 0; // tapering segments
 	bool   mainshape = false;
+	
+	String ToString() const;
 
 	void SetAttr(const Pt& b){ kerf = b.kerf; segment = b.segment; mainshape = b.mainshape; sharp = b.sharp; }
 	Pt Attr(const Pt& b)     { Pt p = *this; p.SetAttr(b); return p; }

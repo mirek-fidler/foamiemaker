@@ -64,6 +64,8 @@ void MixAll(const Vector<Pt>& left, const Vector<Pt>& right,
 	int li = 0;
 	int ri = 0;
 	DLOG("- MixAll ---------------");
+	DDUMPC(left);
+	DDUMPC(right);
 	while(li < left.GetCount() && left[li].segment == segment && ri < right.GetCount() && right[ri].segment == segment) {
 		int li0 = li;
 		while(li < left.GetCount() && left[li].segment == segment)
@@ -96,6 +98,10 @@ void CncPath(Vector<Pt>& left, Vector<Pt>& right, double width, double tower_dis
 	ASSERT(left.GetCount() == right.GetCount());
 	
 	double right_distance = tower_distance - width - left_distance;
+
+	DLOG("-------------------");
+	DDUMPC(left);
+	DDUMPC(right);
 	
 	for(int i = 0; i < left.GetCount(); i++) {
 		Pt& l = left[i];
@@ -109,6 +115,9 @@ void CncPath(Vector<Pt>& left, Vector<Pt>& right, double width, double tower_dis
 		l.x += xslope * left_distance;
 		r.x -= xslope * right_distance;
 	}
+	
+	DDUMPC(left);
+	DDUMPC(right);
 }
 
 void TestMix()

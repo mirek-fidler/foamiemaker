@@ -1,5 +1,19 @@
 #include "Hot4d.h"
 
+String Pt::ToString() const
+{
+	String h;
+	h << (Pointf)*this;
+	h << "segment: " << segment;
+	if(kerf)
+		h << " kerf";
+	if(sharp)
+		h << " sharp";
+	if(mainshape)
+		h << " mainshape";
+	return h;
+}
+
 void Path::To(Pt p, bool kerf)
 {
 	auto& h = Add();
@@ -94,8 +108,8 @@ void FourAxisDlg::MakePaths(Vector<Pt> *shape, Vector<Pt> *path, Vector<Pt> *cnc
 		}
 		else
 			p.Clear();
-		NormalizeSegments(p);
 		path[r] = GetKerfPath(p, GetKerf(r));
+		NormalizeSegments(path[r]);
 	}
 
 	if(IsTapered()) {

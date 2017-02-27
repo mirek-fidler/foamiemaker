@@ -123,7 +123,8 @@ Path Text::Get()
 	Path r;
 	Font fnt = Font(~font, (int)~height).Bold(~bold).Italic(~italic);
 	String h = ~text;
-	Pointf pos = Pointf(~leadin, ~line);
+	Pointf pos = Pointf(~leadin, ~cline);
+	double ly = ~line;
 	r.To(0, pos.y);
 	r.To(pos.x, pos.y);
 	for(int i = 0; i < h.GetCount(); i++) {
@@ -131,7 +132,7 @@ Path Text::Get()
 		Pointf npos = pos;
 		npos.x += fnt[h[i]] + (int)~spacing;
 		r.To(pos);
-		DoApproximateChar(ch, pos, h[i], fnt, 10);
+		DoApproximateChar(ch, Pointf(pos.x, ly), h[i], fnt, 10);
 		if(ch.GetCount() > 2) {
 			int ei = FindBest(ch, [=](Pointf p1, Pointf p2) {
 				return SquaredDistance(Nvl(p1, Pointf(INT_MAX, INT_MAX)), pos) <
@@ -168,8 +169,9 @@ Text::Text()
 	font.Add(Font::MONOSPACE, "Monospace");
 	
 	font <<= Font::SERIF;
-	height <<= 20;
-	line <<= 8;
+	height <<= 150;
+	line <<= 180;
+	cline <<= 8;
 	leadin <<= 10;
 	spacing <<= 0;
 }
