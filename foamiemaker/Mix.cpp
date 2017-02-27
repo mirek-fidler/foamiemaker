@@ -17,14 +17,18 @@ void Mix(const Vector<Pt>& left, int li, int lcount,
 	
 	if(rlen > 0) {
 		double ratio = llen / rlen;
+		DDUMP(llen);
+		DDUMP(rlen);
 		while(li < lh && ri < rh) {
 			Pt lb = left[li];
 			Pt rb = right[ri];
 			
 			double ld = Distance(la, lb);
+			DDUMP(ratio);
+			DDUMP(Distance(ra, rb));
 			double rd = ratio * Distance(ra, rb);
 			
-			if(abs(rd - ld) < ld / 100000) {
+			if(abs(rd - ld) < ld / 100000 || rd < 0.00001 || ld < 0.00001) {
 				left_out.Add(la = lb);
 				li++;
 				right_out.Add(ra = rb);
@@ -35,13 +39,13 @@ void Mix(const Vector<Pt>& left, int li, int lcount,
 				right_out.Add(ra = rb);
 				ri++;
 				left_out.Add(la = Pt((lb - la) * (rd / ld) + la)); // TODO: Attr ?
-				DLOG("rd < ld");
+				DLOG("rd < ld, ld: " << ld);
 			}
 			else {
 				left_out.Add(la = lb);
 				li++;
 				right_out.Add(ra = Pt((rb - ra) * (ld / rd) + ra)); // TODO: Attr ?
-				DLOG("ld < rd");
+				DLOG("ld < rd, rd: " << rd);
 			}
 		}
 	}
@@ -54,7 +58,7 @@ void Mix(const Vector<Pt>& left, int li, int lcount,
 
 void MixAll(const Vector<Pt>& left, const Vector<Pt>& right,
             Vector<Pt>& left_out, Vector<Pt>& right_out)
-{
+{ // mixes path by segments
 	if(left.GetCount() == 0 || right.GetCount() == 0) {
 		left_out = clone(left);
 		right_out = clone(right);

@@ -83,7 +83,9 @@ Vector<Pt> KerfCompensation(const Vector<Pt>& in0, double kerf)
 				path << c.Attr(p1);
 		}
 	}
-	path << k3.Attr(p2) << in.Top();
+	if(k3 != in.Top())
+		path << k3.Attr(p2);
+	path << in.Top();
 	
 	return path;
 }

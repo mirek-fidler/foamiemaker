@@ -25,9 +25,10 @@ void CutSpar(Path& r, const Vector<Pt>& foil, int& i, Pt pos, Pt dim, bool circl
 		if(!IsNull(si))
 			r.SetSegment(si);
 		r.Kerf(p);
-		r.NewSegment();
 		r.To(p - u * dim.y);
+		r.NewSegment();
 		Circle(r, p - u * (dim.x / 2 + dim.y), dim.x / 2, dir.x < 0 ? M_PI : 0);
+		r.NewSegment();
 		r.To(p - u * dim.y);
 		r.To(p);
 		if(IsNull(si))
