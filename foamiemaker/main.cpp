@@ -191,6 +191,14 @@ void Shape::SyncView()
 
 GUI_APP_MAIN
 {
+#ifdef _DEBUG
+	TopWindow win;
+	SparsCtrl ctrl;
+	win.Add(ctrl.SizePos());
+	win.Run();
+	DDUMP(AsJSON(ctrl.GetData()));
+	return;
+#endif
 #ifdef _DEBUG0
 	void TestMix();
 	TestMix();

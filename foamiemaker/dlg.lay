@@ -247,3 +247,20 @@ LAYOUT(FuseProfileLayout, 480, 252)
 	ITEM(EditDoubleSpin, saddle_y, LeftPosZ(420, 52).TopPosZ(176, 19))
 END_LAYOUT
 
+LAYOUT(SparsLayout, 400, 200)
+	ITEM(ArrayCtrl, list, HSizePosZ(8, 220).VSizePosZ(8, 8))
+	ITEM(Label, dv___1, SetLabel(t_("At")).RightPosZ(176, 40).TopPosZ(8, 19))
+	ITEM(DropList, at, RightPosZ(84, 108).TopPosZ(8, 19))
+	ITEM(EditDoubleSpin, at_pos, RightPosZ(28, 52).TopPosZ(8, 19))
+	ITEM(DropList, type, RightPosZ(28, 188).TopPosZ(32, 19))
+	ITEM(Label, dv___5, SetLabel(t_("width")).RightPosZ(184, 32).TopPosZ(56, 19))
+	ITEM(EditDoubleSpin, width, RightPosZ(128, 52).TopPosZ(56, 19))
+	ITEM(Label, dv___7, SetLabel(t_("height")).RightPosZ(80, 40).TopPosZ(56, 19))
+	ITEM(EditDoubleSpin, height, RightPosZ(28, 52).TopPosZ(56, 19))
+	ITEM(Button, add, SetLabel(t_("Add")).RightPosZ(172, 40).BottomPosZ(8, 24))
+	ITEM(Button, duplicate, SetLabel(t_("Duplicate")).RightPosZ(108, 60).BottomPosZ(8, 24))
+	ITEM(Button, remove, SetLabel(t_("Remove")).RightPosZ(48, 56).BottomPosZ(8, 24))
+	ITEM(Button, up, RightPosZ(24, 20).BottomPosZ(8, 24))
+	ITEM(Button, down, RightPosZ(4, 16).BottomPosZ(8, 24))
+END_LAYOUT
+

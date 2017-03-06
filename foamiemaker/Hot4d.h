@@ -99,12 +99,22 @@ struct Path : Vector<Pt> {
 };
 
 enum { BOTTOM_SPAR, TOP_SPAR, RIGHT_SPAR };
+enum { RECTANGLE_SPAR, CIRCLE_SPAR };
 
 struct Spar : Moveable<Spar> {
 	int    kind;
 	double pos;
+	int    shape;
 	Sizef  dimension;
-	bool   circle;
+};
+
+struct SparsCtrl : WithSparsLayout<ParentCtrl> {
+	virtual Value GetData() const;
+	virtual void  SetData(const Value& data);
+	
+	Vector<Spar> Get() const;
+
+	SparsCtrl();
 };
 
 void Circle(Path& path, Pt c, double r, double a0);
@@ -130,6 +140,24 @@ struct Shape : ParentCtrl {
 	
 	void SyncView();
 };
+
+struct AirfoilCtrl : public DataPusher {
+	virtual void DoAction();
+	
+	void Render(Path& path, double width, Pt p0, double te, bool smooth);
+	
+	Vector<Pt> Get();
+	
+	AirfoilCtrl();
+};
+
+Vector<Pt> GetHalfFoil(const Vector<Pt>& foil, bool bottomhalf = false);
+void       InvertX(Vector<Pt>& foil);
+void       Mul(Vector<Pt>& foil, double ax, double ay);
+double     GetMaxY(const Vector<Pt>& foil, double sgny = 1);
+void       CutHalfFoil(Vector<Pt>& foil, double head, double tail);
+
+struct FourAxisDlg;
 
 struct Rod : WithRodLayout<Shape> {
 	virtual Path     Get();
@@ -161,24 +189,6 @@ struct Angle : WithAngleLayout<Shape> {
 
 	Angle();
 };
-
-struct AirfoilCtrl : public DataPusher {
-	virtual void DoAction();
-	
-	void Render(Path& path, double width, Pt p0, double te, bool smooth);
-	
-	Vector<Pt> Get();
-	
-	AirfoilCtrl();
-};
-
-Vector<Pt> GetHalfFoil(const Vector<Pt>& foil, bool bottomhalf = false);
-void       InvertX(Vector<Pt>& foil);
-void       Mul(Vector<Pt>& foil, double ax, double ay);
-double     GetMaxY(const Vector<Pt>& foil, double sgny = 1);
-void       CutHalfFoil(Vector<Pt>& foil, double head, double tail);
-
-struct FourAxisDlg;
 
 struct Wing : WithWingLayout<Shape> {
 	typedef Wing CLASSNAME;

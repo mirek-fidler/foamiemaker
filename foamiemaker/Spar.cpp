@@ -86,18 +86,19 @@ bool DoSpar(Path& r, const Vector<Pt>& foil, int& i, Spar& spar)
 		return false;
 	Pt p = foil[i];
 	Pt prev = foil[i - 1];
+	bool circle = spar.shape == CIRCLE_SPAR;
 	if(spar.kind == TOP_SPAR && p.x > spar.pos && p.x > foil[i - 1].x) {
-		CutSpar(r, foil, i, Pt(spar.pos, Null), spar.dimension, spar.circle, Point(1, 0));
+		CutSpar(r, foil, i, Pt(spar.pos, Null), spar.dimension, circle, Point(1, 0));
 		spar.kind = Null;
 		return true;
 	}
 	if(spar.kind == BOTTOM_SPAR && p.x < spar.pos && p.x < foil[i - 1].x) {
-		CutSpar(r, foil, i, Pt(spar.pos, Null), spar.dimension, spar.circle, Point(-1, 0));
+		CutSpar(r, foil, i, Pt(spar.pos, Null), spar.dimension, circle, Point(-1, 0));
 		spar.kind = Null;
 		return true;
 	}
 	if(spar.kind == RIGHT_SPAR && p.y < spar.pos && p.y < foil[i - 1].y) {
-		CutSpar(r, foil, i, Pt(spar.pos, Null), spar.dimension, spar.circle, Point(0, 1));
+		CutSpar(r, foil, i, Pt(spar.pos, Null), spar.dimension, circle, Point(0, 1));
 		spar.kind = Null;
 		return true;
 	}
@@ -120,8 +121,8 @@ void ReadSpar(Vector<Spar>& spar, int kind, double le, Ctrl& pos, Ctrl& cx, Ctrl
 		s.kind = kind;
 		s.dimension = dim;
 		s.pos = le - (double)~pos;
-		s.circle = (bool)~circle;
-		if(!s.circle) {
+		s.shape = (bool)~circle ? CIRCLE_SPAR : RECTANGLE_SPAR;
+		if(!(bool)~circle) {
 			if(kind == TOP_SPAR)
 				s.pos -= dim.cx / 2;
 			if(kind == BOTTOM_SPAR)

@@ -6,6 +6,7 @@ file
 	Hot4d.h,
 	Util.cpp,
 	Spar.cpp,
+	Spars.cpp,
 	Airfoil.cpp,
 	Kerf.cpp,
 	Mix.cpp,
