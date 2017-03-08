@@ -191,7 +191,7 @@ void Shape::SyncView()
 
 GUI_APP_MAIN
 {
-#ifdef _DEBUG
+#ifdef _DEBUG0
 	TopWindow win;
 	SparsCtrl ctrl;
 	win.Add(ctrl.SizePos());

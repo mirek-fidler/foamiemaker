@@ -103,9 +103,14 @@ Path FuseProfile::Get()
 		else
 			shape = pick(shape2);
 	}
+	
+	Vector<Spar> sp = spars.Get();
 
-	for(Pt p : shape)
-		r.Kerf(p);
+	for(int i = 0; i < shape.GetCount(); i++) {
+		r.MainShape();
+		if(!DoSpars(r, shape, i, sp))
+			r.Kerf(shape[i]);
+	}
 
 	r.Identity();
 	r.Kerf(0, start.y + ty);

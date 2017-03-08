@@ -17,7 +17,7 @@ void CutSpar(Path& r, const Vector<Pt>& foil, int& i, Pt pos, Pt dim, bool circl
 	Pt p = LineIntersection(foil[i - 1], foil[i],
 	                        Pt(Nvl(pos.x, 0.0), Nvl(pos.y, 0.0)), Pt(Nvl(pos.x, 1.0), Nvl(pos.y, 1.0)));
 	int pi = i - 1;
-	while(pi >= 0 && foil[pi] == p)
+	while(pi > 0 && foil[pi] == p)
 		pi--;
 	Pt prev = foil[pi];
 	if(circle) {

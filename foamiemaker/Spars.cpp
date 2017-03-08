@@ -42,10 +42,7 @@ SparsCtrl::SparsCtrl()
 	for(Ctrl *q = GetFirstChild(); q; q = q->GetNext()) {
 		if(q != &list && !dynamic_cast<Button *>(q)) {
 			*q << [=] {
-				if(list.AcceptRow()) {
-					q->ClearModify();
-					WhenAction();
-				}
+				Sync();
 			};
 		}
 	}
@@ -61,6 +58,7 @@ SparsCtrl::SparsCtrl()
 		list.GoEnd();
 		at <<= TOP_SPAR;
 		at_pos <<= 0;
+		Sync();
 	};
 	
 	remove << [=] {
@@ -75,6 +73,15 @@ SparsCtrl::SparsCtrl()
 		list.Add();
 		list.GoEnd();
 	};
+}
+
+void SparsCtrl::Sync()
+{
+	if(list.AcceptRow()) {
+		for(Ctrl *q = GetFirstChild(); q; q = q->GetNext())
+			q->ClearModify();
+		WhenAction();
+	}
 }
 
 Vector<Spar> SparsCtrl::Get() const

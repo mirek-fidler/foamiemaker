@@ -112,6 +112,8 @@ struct SparsCtrl : WithSparsLayout<ParentCtrl> {
 	virtual Value GetData() const;
 	virtual void  SetData(const Value& data);
 	
+	void Sync();
+	
 	Vector<Spar> Get() const;
 
 	SparsCtrl();
@@ -226,6 +228,8 @@ struct FuseProfile : WithFuseProfileLayout<Shape> {
 	typedef FuseProfile CLASSNAME;
 	
 	AirfoilCtrl airfoil, saddle_airfoil;
+	
+	SparsCtrl spars;
 	
 	virtual Path    Get();
 	virtual String  GetId() const   { return "fuseprofile"; }
