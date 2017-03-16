@@ -17,15 +17,11 @@ void Mix(const Vector<Pt>& left, int li, int lcount,
 	
 	if(rlen > 0) {
 		double ratio = llen / rlen;
-		DDUMP(llen);
-		DDUMP(rlen);
 		while(li < lh && ri < rh) {
 			Pt lb = left[li];
 			Pt rb = right[ri];
 			
 			double ld = Distance(la, lb);
-			DDUMP(ratio);
-			DDUMP(Distance(ra, rb));
 			double rd = ratio * Distance(ra, rb);
 			
 			if(abs(rd - ld) < ld / 100000 || rd < 0.00001 || ld < 0.00001) {
@@ -39,13 +35,11 @@ void Mix(const Vector<Pt>& left, int li, int lcount,
 				right_out.Add(ra = rb);
 				ri++;
 				left_out.Add(la = Pt((lb - la) * (rd / ld) + la)); // TODO: Attr ?
-				DLOG("rd < ld, ld: " << ld);
 			}
 			else {
 				left_out.Add(la = lb);
 				li++;
 				right_out.Add(ra = Pt((rb - ra) * (ld / rd) + ra)); // TODO: Attr ?
-				DLOG("ld < rd, rd: " << rd);
 			}
 		}
 	}
@@ -67,9 +61,6 @@ void MixAll(const Vector<Pt>& left, const Vector<Pt>& right,
 	int segment = 0;
 	int li = 0;
 	int ri = 0;
-	DLOG("- MixAll ---------------");
-	DDUMPC(left);
-	DDUMPC(right);
 	while(li < left.GetCount() && left[li].segment == segment && ri < right.GetCount() && right[ri].segment == segment) {
 		int li0 = li;
 		while(li < left.GetCount() && left[li].segment == segment)
@@ -77,21 +68,15 @@ void MixAll(const Vector<Pt>& left, const Vector<Pt>& right,
 		int ri0 = ri;
 		while(ri < right.GetCount() && right[ri].segment == segment)
 			ri++;
-		DLOG(segment << " " << li - li0 << " " << ri - ri0);
-		if(li > li0 && ri > ri0) {
-			DDUMP(SubRange(left, li0, li - li0));
-			DDUMP(SubRange(right, ri0, ri - ri0));
+		if(li > li0 && ri > ri0)
 			Mix(left, li0, li - li0, right, ri0, ri - ri0, left_out, right_out);
-		}
 		segment++;
 	}
 	while(li < left.GetCount()) {
-		DDUMP(li);
 		left_out.Add(left[li++]);
 		right_out.Add(right.Top());
 	}
 	while(ri < right.GetCount()) {
-		DDUMP(ri);
 		left_out.Add(left.Top());
 		right_out.Add(right[ri++]);
 	}
@@ -103,10 +88,6 @@ void CncPath(Vector<Pt>& left, Vector<Pt>& right, double width, double tower_dis
 	
 	double right_distance = tower_distance - width - left_distance;
 
-	DLOG("-------------------");
-	DDUMPC(left);
-	DDUMPC(right);
-	
 	for(int i = 0; i < left.GetCount(); i++) {
 		Pt& l = left[i];
 		Pt& r = right[i];
@@ -119,9 +100,6 @@ void CncPath(Vector<Pt>& left, Vector<Pt>& right, double width, double tower_dis
 		l.x += xslope * left_distance;
 		r.x -= xslope * right_distance;
 	}
-	
-	DDUMPC(left);
-	DDUMPC(right);
 }
 
 void TestMix()
@@ -156,12 +134,6 @@ void TestMix()
 			DrawPath(w, left, Blue(), Pointf(0, 0));
 			DrawPath(w, right, Red(), Pointf(600, 0));
 
-			LOG("+++++++++");
-
-			DDUMP(lout.GetCount());
-			DDUMP(lout);
-			DDUMP(rout.GetCount());
-			DDUMP(rout);
 			DrawPath(w, lout, Blue(), Pointf(0, 300));
 			DrawPath(w, rout, Red(), Pointf(600, 300));
 			LOG("---------");
@@ -171,14 +143,8 @@ void TestMix()
 	Vector<Pt> left, right;
 	
 	auto Test = [](const Vector<Pt>& left, const Vector<Pt>& right) {
-		LOG("============================");
-		DUMP(left);
-		DUMP(right);
-
 		Vector<Pt> lout, rout;
 		Mix(left, 0, left.GetCount(), right, 0, right.GetCount(), lout, rout);
-		DUMP(lout);
-		DUMP(rout);
 	};
 
 	left << Pt(4, 4);

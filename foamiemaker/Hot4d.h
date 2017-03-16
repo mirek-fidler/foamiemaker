@@ -106,6 +106,8 @@ struct Spar : Moveable<Spar> {
 	double pos;
 	int    shape;
 	Sizef  dimension;
+	double depth;
+	double angle = Null;
 };
 
 struct SparsCtrl : WithSparsLayout<ParentCtrl> {
@@ -114,13 +116,14 @@ struct SparsCtrl : WithSparsLayout<ParentCtrl> {
 	
 	void Sync();
 	
-	Vector<Spar> Get() const;
+	Vector<Spar> Get(Pointf origin = Pointf(0, 0), Sizef dir = Pointf(1, 1)) const;
 
 	SparsCtrl();
 };
 
 void Circle(Path& path, Pt c, double r, double a0);
-void CutSpar(Path& r, const Vector<Pt>& foil, int& i, Pt pos, Pt dim, bool circle, Point dir);
+void CutSpar(Path& r, const Vector<Pt>& foil, int& i, Pt pos, const Spar& spar, Point dir);
+// void CutSpar(Path& r, const Vector<Pt>& foil, int& i, Pt pos, Pt dim, bool circle, Point dir, double angle = Null);
 bool DoSpars(Path& r, const Vector<Pt>& foil, int& i, Vector<Spar>& spars);
 void ReadSpar(Vector<Spar>& spar, int kind, double le, Ctrl& pos, Ctrl& cx, Ctrl& cy, Ctrl& circle);
 
@@ -167,6 +170,8 @@ struct Rod : WithRodLayout<Shape> {
 	virtual String   GetName() const { return "Rod"; }
 	virtual dword    GetInfo() const { return TAPERABLE; }
 
+	SparsCtrl   spars;
+
 	typedef Rod CLASSNAME;
 
 	Rod();
@@ -196,6 +201,7 @@ struct Wing : WithWingLayout<Shape> {
 	typedef Wing CLASSNAME;
 	
 	AirfoilCtrl airfoil;
+	SparsCtrl   spars;
 
 	virtual Path    Get();
 	virtual String  GetId() const   { return "wing"; }

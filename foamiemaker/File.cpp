@@ -119,7 +119,6 @@ String FourAxisDlg::MakeSave()
 void FourAxisDlg::StoreRevision()
 {
 	revision = FastCompress(MakeSave());
-	DDUMP(revision.GetCount());
 }
 
 bool FourAxisDlg::Load(const char *path)

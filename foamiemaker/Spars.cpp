@@ -16,12 +16,21 @@ SparsCtrl::SparsCtrl()
 	list.AddCtrl("shape", type);
 	list.AddCtrl("width", width);
 	list.AddCtrl("height", height);
+	list.AddCtrl("angle", angle);
+	list.AddCtrl("depth", depth);
 	struct CvAt : Convert {
 		Value Format(const Value& v) const {
-			return String() << decode(v["kind"], TOP_SPAR, "Top", RIGHT_SPAR, "Right", "Bottom")
-			                << " at " << ~v["pos"]
-			                << decode(v["shape"], RECTANGLE_SPAR, ", □ ", CIRCLE_SPAR, ", ○ ", ", ? ")
-			                << AsString(v["width"]) << "×" << AsString(v["height"]);
+			String h = String() << decode(v["kind"], TOP_SPAR, "Top", RIGHT_SPAR, "Right", "Bottom")
+			                    << " at " << ~v["pos"]
+			                    << decode(v["shape"], RECTANGLE_SPAR, ", □ ", CIRCLE_SPAR, ", ○ ", ", ? ")
+			                    << AsString(v["width"]) << "×" << AsString(v["height"]);
+			double angle = v["angle"];
+			if(!IsNull(angle))
+				h << ", < " << angle << "°";
+			double depth = v["depth"];
+			if(!IsNull(depth))
+				h << ", depth " << depth;
+			return h;
 		}
 	};
 	list.AddColumnAt("kind", "Feature")
@@ -29,12 +38,13 @@ SparsCtrl::SparsCtrl()
 	    .Add("shape")
 	    .Add("width")
 	    .Add("height")
+	    .Add("angle")
+	    .Add("depth")
 	    .SetConvert(Single<CvAt>());
 	
 	list.WhenSel = [=] {
 		int c = list.GetCursor();
 		remove.Enable(c >= 0);
-		duplicate.Enable(c >= 0);
 		up.Enable(list.GetCursor() > 0);
 		down.Enable(list.GetCursor() < list.GetCount() - 1);
 	};
@@ -57,21 +67,15 @@ SparsCtrl::SparsCtrl()
 		list.Add();
 		list.GoEnd();
 		at <<= TOP_SPAR;
+		type <<= RECTANGLE_SPAR;
 		at_pos <<= 0;
+		width <<= 5;
+		height <<= 3;
 		Sync();
 	};
 	
 	remove << [=] {
 		list.DoRemove();
-	};
-	
-	duplicate << [=] {
-		int i = list.GetCursor();
-		if(i < 0)
-			return;
-		
-		list.Add();
-		list.GoEnd();
 	};
 }
 
@@ -84,7 +88,7 @@ void SparsCtrl::Sync()
 	}
 }
 
-Vector<Spar> SparsCtrl::Get() const
+Vector<Spar> SparsCtrl::Get(Pointf origin, Sizef dir) const
 {
 	Vector<Spar> spars;
 	for(int i = 0; i < list.GetCount(); i++) {
@@ -95,6 +99,14 @@ Vector<Spar> SparsCtrl::Get() const
 		spar.dimension.cx = m["width"];
 		spar.dimension.cy = m["height"];
 		spar.shape = m["shape"];
+		spar.angle = m["angle"];
+		spar.depth = m["depth"];
+		if(findarg(spar.kind, TOP_SPAR, BOTTOM_SPAR) >= 0)
+			spar.pos = origin.x + dir.cx * spar.pos;
+		else
+			spar.pos = origin.y + dir.cy * spar.pos;
+		if(spar.shape == RECTANGLE_SPAR && Nvl(spar.depth) == 0)
+			spar.pos += (spar.kind == TOP_SPAR ? -1 : 1) * spar.dimension.cx / 2;
 	}
 	return spars;
 }
@@ -116,8 +128,8 @@ void SparsCtrl::SetData(const Value& data)
 	list.Clear();
 	for(int i = 0; i < data.GetCount(); i++) {
 		ValueMap m = data[i];
-		m.Set(m["kind"], decode(m["kind"], "top", TOP_SPAR, "right", RIGHT_SPAR, BOTTOM_SPAR));
-		m.Set(m["shape"], decode(m["shape"], "rectangle", RECTANGLE_SPAR, CIRCLE_SPAR));
+		m.Set("kind", decode(m["kind"], "top", TOP_SPAR, "right", RIGHT_SPAR, BOTTOM_SPAR));
+		m.Set("shape", decode(m["shape"], "rectangle", RECTANGLE_SPAR, CIRCLE_SPAR));
 		list.AddMap(m);
 	}
 	list.GoBegin();

@@ -225,14 +225,14 @@ GUI_APP_MAIN
 	const Vector<String>& cmdline = CommandLine();
 	int argc = cmdline.GetCount();
 
-	dlg.OpenMain();
-
 	if(argc == 1 && ToLower(GetFileExt(cmdline[0])) == ".nc") {
 		if(!dlg.OpenS(cmdline[0]))
 			return;
 	}
 
 	DUMP("D");
+	
+	dlg.Execute();
 
 	Ctrl::EventLoop();
 	

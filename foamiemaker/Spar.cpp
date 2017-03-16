@@ -9,27 +9,44 @@ void Circle(Path& path, Pt c, double r, double a0)
 	}
 }
 
-void CutSpar(Path& r, const Vector<Pt>& foil, int& i, Pt pos, Pt dim, bool circle, Point dir)
+void CutSpar(Path& r, const Vector<Pt>& foil, int& i, Pt pos, const Spar& spar, Point dir)
 {
-	DLOG("Spar");
 	int si = foil[i].segment;
-	DDUMP(si);
 	Pt p = LineIntersection(foil[i - 1], foil[i],
 	                        Pt(Nvl(pos.x, 0.0), Nvl(pos.y, 0.0)), Pt(Nvl(pos.x, 1.0), Nvl(pos.y, 1.0)));
 	int pi = i - 1;
 	while(pi > 0 && foil[pi] == p)
 		pi--;
 	Pt prev = foil[pi];
-	if(circle) {
-		Pt u = Orthogonal(p - prev) / Distance(p, prev);
+	double depth = Nvl(spar.depth);
+	Sizef dim = spar.dimension;
+	double a = spar.angle;
+	if(!IsNull(a)) {
+		if(spar.kind == TOP_SPAR)
+			a += 90;
+		if(spar.kind == BOTTOM_SPAR)
+			a -= 90;
+		a = M_2PI * a / 360;
+	}
+	if(spar.shape == CIRCLE_SPAR || depth) {
+		Pt u = IsNull(a) ? Orthogonal(p - prev) / Distance(p, prev) : Polar(a);
 		if(!IsNull(si))
 			r.SetSegment(si);
 		r.Kerf(p);
-		r.To(p - u * dim.y);
+		Pointf p1 = p - u * spar.depth;
+		r.To(p1);
 		r.NewSegment();
-		Circle(r, p - u * (dim.x / 2 + dim.y), dim.x / 2, dir.x < 0 ? M_PI : 0);
+		if(spar.shape == CIRCLE_SPAR)
+			Circle(r, p - u * (dim.cx / 2 + dim.cy), dim.cx / 2, Bearing(u) - M_PI / 2);
+		else {
+			r.Sharp(p1 + Orthogonal(u) * dim.cx / 2);
+			r.Sharp(p1 + Orthogonal(u) * dim.cx / 2 - u * dim.cy);
+			r.Sharp(p1 - Orthogonal(u) * dim.cx / 2 - u * dim.cy);
+			r.Sharp(p1 - Orthogonal(u) * dim.cx / 2);
+			r.Sharp(p1);
+		}
 		r.NewSegment();
-		r.To(p - u * dim.y);
+		r.To(p1);
 		r.To(p);
 		if(IsNull(si))
 			r.NewSegment();
@@ -40,7 +57,7 @@ void CutSpar(Path& r, const Vector<Pt>& foil, int& i, Pt pos, Pt dim, bool circl
 		Pt p2 = Null;
 		while(i < foil.GetCount()) {
 			double t1, t2;
-			LineCircleIntersections(p, dim.x, foil[i - 1], foil[i], t1, t2, 999999);
+			LineCircleIntersections(p, dim.cx, foil[i - 1], foil[i], t1, t2, 999999);
 			if(t1 < 0 || t1 > 1)
 				t1 = DBL_MAX;
 			if(t2 < 0 || t2 > 1)
@@ -65,9 +82,9 @@ void CutSpar(Path& r, const Vector<Pt>& foil, int& i, Pt pos, Pt dim, bool circl
 			r.Kerf(p);
 			r.NewSegment();
 			Pt u = Orthogonal(p2 - p) / Distance(p2, p);
-			p -= u * dim.y;
+			p -= u * dim.cy;
 			r.Sharp(p);
-			p -= Orthogonal(u) * dim.x;
+			p -= Orthogonal(u) * dim.cx;
 			r.Sharp(p);
 			r.Kerf(p2);
 			if(IsNull(si))
@@ -77,7 +94,6 @@ void CutSpar(Path& r, const Vector<Pt>& foil, int& i, Pt pos, Pt dim, bool circl
 			r.Kerf(foil[i]);
 		}
 	}
-	DLOG("End of spar");
 }
 
 bool DoSpar(Path& r, const Vector<Pt>& foil, int& i, Spar& spar)
@@ -88,17 +104,17 @@ bool DoSpar(Path& r, const Vector<Pt>& foil, int& i, Spar& spar)
 	Pt prev = foil[i - 1];
 	bool circle = spar.shape == CIRCLE_SPAR;
 	if(spar.kind == TOP_SPAR && p.x > spar.pos && p.x > foil[i - 1].x) {
-		CutSpar(r, foil, i, Pt(spar.pos, Null), spar.dimension, circle, Point(1, 0));
+		CutSpar(r, foil, i, Pt(spar.pos, Null), spar, Point(1, 0));
 		spar.kind = Null;
 		return true;
 	}
 	if(spar.kind == BOTTOM_SPAR && p.x < spar.pos && p.x < foil[i - 1].x) {
-		CutSpar(r, foil, i, Pt(spar.pos, Null), spar.dimension, circle, Point(-1, 0));
+		CutSpar(r, foil, i, Pt(spar.pos, Null), spar, Point(-1, 0));
 		spar.kind = Null;
 		return true;
 	}
 	if(spar.kind == RIGHT_SPAR && p.y < spar.pos && p.y < foil[i - 1].y) {
-		CutSpar(r, foil, i, Pt(spar.pos, Null), spar.dimension, circle, Point(0, 1));
+		CutSpar(r, foil, i, Pt(spar.pos, Null), spar, Point(0, 1));
 		spar.kind = Null;
 		return true;
 	}

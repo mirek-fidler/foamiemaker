@@ -75,16 +75,16 @@ Path Rod::Get()
 
 	path.EndMainShape();
 
-	Vector<Spar> spars;
-	double w = center.x;
-	ReadSpar(spars, TOP_SPAR, w, top_spar, top_spar_width, top_spar_height, top_spar_circle);
-	ReadSpar(spars, RIGHT_SPAR, center.y, right_spar, right_spar_width, right_spar_height, right_spar_circle);
-	ReadSpar(spars, BOTTOM_SPAR, w, bottom_spar, bottom_spar_width, bottom_spar_height, bottom_spar_circle);
+	Vector<Spar> sp = spars.Get(center);
+//	double w = center.x;
+//	ReadSpar(spars, TOP_SPAR, w, top_spar, top_spar_width, top_spar_height, top_spar_circle);
+//	ReadSpar(spars, RIGHT_SPAR, center.y, right_spar, right_spar_width, right_spar_height, right_spar_circle);
+//	ReadSpar(spars, BOTTOM_SPAR, w, bottom_spar, bottom_spar_width, bottom_spar_height, bottom_spar_circle);
 
 	Path r;
 	r.segment_counter = 1000;
 	for(int i = 0; i < path.GetCount(); i++)
-		if(!(path[i].mainshape && DoSpars(r, path, i, spars)))
+		if(!(path[i].mainshape && DoSpars(r, path, i, sp)))
 			r.Add(path[i]);
 
 	r.NewSegment();

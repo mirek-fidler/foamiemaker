@@ -82,7 +82,6 @@ void NormalizeSegments(Vector<Pt>& path)
 		}
 		pt.segment = sgi;
 	}
-	DDUMP(sgi);
 }
 
 void FourAxisDlg::MakePaths(Vector<Pt> *shape, Vector<Pt> *path, Vector<Pt> *cnc, double inverted)
