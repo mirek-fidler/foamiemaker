@@ -156,6 +156,8 @@ struct AirfoilCtrl : public DataPusher {
 	AirfoilCtrl();
 };
 
+
+Rect       GetMaxIs(const Vector<Pt>& shape);
 Vector<Pt> GetHalfFoil(const Vector<Pt>& foil, bool bottomhalf = false);
 void       InvertX(Vector<Pt>& foil);
 void       Mul(Vector<Pt>& foil, double ax, double ay);

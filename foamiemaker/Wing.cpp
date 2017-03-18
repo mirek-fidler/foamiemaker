@@ -18,14 +18,18 @@ Path Wing::Get()
 	}
 
 	Vector<Spar> sp = spars.Get(Pointf(w, start.y), Sizef(-1, 1));
+	
+	if(te_sym)
+		t /= 2;
 
 	Vector<Pt> foil = airfoil.Get();
+	int halfi = GetMaxIs(foil).left;
 	for(int i = 0; i < foil.GetCount(); i++) {
 		Pt& a = foil[i];
 		a.x = 1 - a.x;
 		a *= width;
-		if(t && a.x < width / 2 && i < foil.GetCount() / 2) // adjust te thickness
-			a.y = max(a.y, t);
+		if(t && a.x < width / 2 && (te_sym || i < halfi)) // adjust te thickness
+			a.y = (i < halfi ? 1 : -1) * max(abs(a.y), t);
 	}
 	
 	double rot = Nvl((double)~rotate);
@@ -37,12 +41,12 @@ Path Wing::Get()
 	if(rot)
 		r.Rotate(width - Nvl((double)~rotate_around), 0, M_2PI * rot / 360.0);
 
-	Pt pp(-start.x, te);
+	Pt pp(-start.x, t);
 	r.NewSegment();
 	r.To(pp);
 	r.NewSegment();
 
-	r.Kerf(-(start.x > 5 ? 5 : start.x / 3), te); // this is lead-in to avoid long stay of wire
+	r.Kerf(-(start.x > 5 ? 5 : start.x / 3), t); // this is lead-in to avoid long stay of wire
 	r.NewSegment();
 
 	bool top = true;
@@ -82,14 +86,16 @@ Path Wing::Get()
 
 	if(cutte) {
 		r.NewSegment();
-		r.Kerf(0 /*-kerf*/, te); // TODO
+		r.Kerf(0 /*-kerf*/, t); // TODO
 	}
 
-	r.NewSegment();
-	r.Kerf(-(start.x > 5 ? 5 : start.x / 3), 0); // this is lead-out to avoid long stay of wire
+	t = te_sym ? -t : 0;
 
 	r.NewSegment();
-	r.Kerf(-start.x, 0);
+	r.Kerf(-(start.x > 5 ? 5 : start.x / 3), t); // this is lead-out to avoid long stay of wire
+
+	r.NewSegment();
+	r.Kerf(-start.x, t);
 
 	r.NewSegment();
 

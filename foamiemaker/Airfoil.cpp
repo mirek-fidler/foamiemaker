@@ -138,6 +138,32 @@ void  InvertX(Vector<Pt>& foil)
 		p.x = 1 - p.x;
 }
 
+Rect GetMaxIs(const Vector<Pt>& shape)
+{
+	Rect r(0, 0, 0, 0);
+	Rectf mx(DBL_MAX, DBL_MAX, -DBL_MAX, -DBL_MAX);
+	for(int i = 0; i < shape.GetCount(); i++) {
+		Pointf p = shape[i];
+		if(p.x < mx.left) {
+			mx.left = p.x;
+			r.left = i;
+		}
+		if(p.x > mx.right) {
+			mx.right = p.x;
+			r.right = i;
+		}
+		if(p.y < mx.top) {
+			mx.top = p.y;
+			r.top = i;
+		}
+		if(p.y > mx.bottom) {
+			mx.bottom = p.y;
+			r.bottom = i;
+		}
+	}
+	return r;
+}
+
 Vector<Pt> GetHalfFoil(const Vector<Pt>& foil, bool bottomhalf)
 {
 	Vector<Pt> r;
