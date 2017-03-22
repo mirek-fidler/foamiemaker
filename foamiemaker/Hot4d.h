@@ -117,7 +117,7 @@ struct Path : Vector<Pt> {
 };
 
 enum { BOTTOM_SPAR, TOP_SPAR, RIGHT_SPAR };
-enum { RECTANGLE_SPAR, CIRCLE_SPAR };
+enum { RECTANGLE_SPAR, CIRCLE_SPAR, FLAP_HINGE };
 
 struct Spar : Moveable<Spar> {
 	int    kind;

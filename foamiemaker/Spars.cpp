@@ -10,6 +10,7 @@ SparsCtrl::SparsCtrl()
 	
 	type.Add(RECTANGLE_SPAR, "Rectangle");
 	type.Add(CIRCLE_SPAR, "Circle");
+	type.Add(FLAP_HINGE, "Hinge");
 	
 	list.AddCtrl("kind", at);
 	list.AddCtrl("pos", at_pos);
@@ -22,7 +23,7 @@ SparsCtrl::SparsCtrl()
 		Value Format(const Value& v) const {
 			String h = String() << decode(v["kind"], TOP_SPAR, "Top", RIGHT_SPAR, "Right", "Bottom")
 			                    << " at " << ~v["pos"]
-			                    << decode(v["shape"], RECTANGLE_SPAR, ", □ ", CIRCLE_SPAR, ", ○ ", ", ? ")
+			                    << decode(v["shape"], RECTANGLE_SPAR, ", □ ", CIRCLE_SPAR, ", ○ ", FLAP_HINGE, ", v ", ", ? ")
 			                    << AsString(v["width"]) << "×" << AsString(v["height"]);
 			double angle = v["angle"];
 			if(!IsNull(angle))
@@ -105,7 +106,7 @@ Vector<Spar> SparsCtrl::Get(Pointf origin, Sizef dir) const
 			spar.pos = origin.x + dir.cx * spar.pos;
 		else
 			spar.pos = origin.y + dir.cy * spar.pos;
-		if(spar.shape == RECTANGLE_SPAR && Nvl(spar.depth) == 0)
+		if(findarg(spar.shape, RECTANGLE_SPAR, FLAP_HINGE) >= 0 && Nvl(spar.depth) == 0)
 			spar.pos += (spar.kind == TOP_SPAR ? -1 : 1) * spar.dimension.cx / 2;
 	}
 	return spars;

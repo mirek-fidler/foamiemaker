@@ -82,10 +82,18 @@ void CutSpar(Path& r, const Vector<Pt>& foil, int& i, Pt pos, const Spar& spar, 
 			r.Kerf(p);
 			r.NewSegment();
 			Pt u = Orthogonal(p2 - p) / Distance(p2, p);
-			p -= u * dim.cy;
-			r.Sharp(p);
-			p -= Orthogonal(u) * dim.cx;
-			r.Sharp(p);
+			if(spar.shape == FLAP_HINGE) {
+				p -= u * dim.cy;
+				Pt p1 = p;
+				p -= Orthogonal(u) * dim.cx;
+				r.Sharp((p1 + p) / 2.0);
+			}
+			else {
+				p -= u * dim.cy;
+				r.Sharp(p);
+				p -= Orthogonal(u) * dim.cx;
+				r.Sharp(p);
+			}
 			r.Kerf(p2);
 			if(IsNull(si))
 				r.NewSegment();
