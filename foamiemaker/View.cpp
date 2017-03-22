@@ -117,6 +117,16 @@ Point FourAxisDlg::ViewOrigin() const
 	return origin;
 }
 
+bool FourAxisDlg::CncOutOfBounds(Vector<Pt> *cnc)
+{
+	for(int pass = 0; pass < 1 + IsTapered(); pass++)
+		for(const Pt& p : cnc[pass])
+			if(p.x < settings.xmin || p.x > settings.xmax ||
+			   p.y < settings.ymin || p.y > settings.ymax)
+				return true;
+	return false;
+}
+
 void FourAxisDlg::Sync()
 {
 	Title(filepath);
@@ -200,7 +210,10 @@ void FourAxisDlg::Sync()
 			Vector<Pt> path[2];
 			Vector<Pt> cnc[2];
 			
-			MakePaths(shape, path, cnc, show_inverted ? GetInvertY() : (double)Null);
+			MakePaths(shape, path, cnc, show_inverted ? GetInvertY() : (double)Null, show_mirrored);
+
+			if(CncOutOfBounds(cnc))
+		        p.Text(origin.x + 20, 10, "CNC path is out of bounds!", Arial(20).Bold()).Fill(Red());
 
 			bool show[2];
 			
@@ -263,7 +276,7 @@ void FourAxisDlg::Sync()
 		
 					PaintPath(p, path[r], scale,
 					          show_wire ? r ? Magenta() : Red() : Null, false,
-					          show_kerf ? Blend(White(), r ? LtMagenta() : LtRed(), 120) : Null, GetKerf(r));
+					          show_kerf ? Blend(White(), r ? LtMagenta() : LtRed(), 120) : Null, abs(GetKerf(r)));
 			
 					if(show_shape)
 						PaintPath(p, shape[r], scale, r ? Magenta() : Red());

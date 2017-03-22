@@ -13,6 +13,24 @@ using namespace Upp;
 #define IMAGEFILE <FoamieMaker/HotImg.iml>
 #include <Draw/iml_header.h>
 
+struct Settings {
+	double left;
+	double width;
+	double right;
+	double xmin;
+	double xmax;
+	double ymin;
+	double ymax;
+	String x;
+	String y;
+	String z;
+	String a;
+	
+	void Jsonize(JsonIO& io);
+	
+	Settings();
+};
+
 struct Pt : Moveable<Pt, Pointf> {
 	bool   kerf = 0; // line is kerf compensated
 	bool   sharp = false; // kerf angle is sharp (e.g. in rectangular spar)
@@ -246,6 +264,20 @@ struct FuseProfile : WithFuseProfileLayout<Shape> {
 	FuseProfile();
 };
 
+struct Tail : WithFuseProfileLayout<Shape> {
+	typedef FuseProfile CLASSNAME;
+	
+	AirfoilCtrl airfoil, saddle_airfoil;
+	
+	SparsCtrl spars;
+	
+	virtual Path    Get();
+	virtual String  GetId() const   { return "tailcut"; }
+	virtual String  GetName() const { return "Fuselage rod tail"; }
+
+	Tail();
+};
+
 struct Motor : WithMotorLayout<Shape> {
 	typedef Motor CLASSNAME;
 
@@ -292,6 +324,8 @@ struct FourAxisDlg : WithFourAxisLayout<TopWindow> {
 	String filepath;
 	String revision;
 	
+	Settings settings;
+	
 	Rod      rod[2];
 	Text     text[1];
 	Angle    angle[1];
@@ -300,6 +334,7 @@ struct FourAxisDlg : WithFourAxisLayout<TopWindow> {
 	TextPath textpath[1];
 	FusePlan fuseplan[1];
 	FuseProfile fuseprofile[1];
+	Tail        tail[1];
 	
 	View     view;
 	Button   home;
@@ -338,6 +373,8 @@ public:
 	void   ViewPars(Font& fnt, int& w, Point& origin) const;
 	Point  ViewOrigin() const;
 	Pt GetViewPos(Point p);
+
+	bool   CncOutOfBounds(Vector<Pt> *cnc);
 	
 	bool   IsTapered() const             { return CurrentShape().IsTaperable() && tapered; }
 	
@@ -346,7 +383,8 @@ public:
 	
 	void   SetBar();
 	void   StoreRevision();
-	void   SaveGCode(Stream& out, double inverted);
+	void   SaveGCode(Stream& out, double inverted, bool mirrored);
+	String Save0(const char *path);
 	bool   Save(const char *path);
 	bool   Load(const char *path);
 	bool   OpenS(const String& fp);
@@ -356,9 +394,11 @@ public:
 	void   NewInstance(const String& path);
 	bool   Save();
 	void   Exit();
-	
+
+	void   CncSetup();
+
 	double     GetKerf(bool right);
-	void       MakePaths(Vector<Pt> *shape, Vector<Pt> *path, Vector<Pt> *cnc, double inverted = Null);
+	void       MakePaths(Vector<Pt> *shape, Vector<Pt> *path, Vector<Pt> *cnc, double inverted = Null, bool mirrored = false);
 	
 	String MakeSave();
 

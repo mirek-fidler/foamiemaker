@@ -16,7 +16,9 @@ void FourAxisDlg::AddShape(Shape *l, Shape *r)
 
 FourAxisDlg::FourAxisDlg()
 {
-	CtrlLayout(*this, "4 axis CNC G-code generator");
+	CtrlLayout(*this, "4 axis CNC G-code generator for RC modelling");
+
+	LoadFromJsonFile(settings, ConfigFile("cnc.json"));
 
 	AddShape(rod, rod + 1);
 	AddShape(text);
@@ -33,13 +35,11 @@ FourAxisDlg::FourAxisDlg()
 	AddShape(textpath);
 	AddShape(fuseplan);
 	AddShape(fuseprofile);
+	AddShape(tail);
 	
 	WhenClose = [=] { Exit(); };
 
 	panel_width <<= 500;
-	tower_distance <<= 700;
-	left_gap <<= 80;
-//	save_as << [=] { Save(); };
 	
 	speed <<= 140;
 	
@@ -122,14 +122,10 @@ void FourAxisDlg::Type()
 	
 	bool b = tapered;
 
-	tower_distance_lbl.Show(b);
 	panel_width_lbl.Show(b);
-	left_gap_lbl.Show(b);
 	right_kerf_lbl.Show(b);
 
-	left_gap.Show(b);
 	panel_width.Show(b);
-	tower_distance.Show(b);
 	right_kerf.Show(b);
 	
 	show_left.Show(b);
@@ -215,7 +211,6 @@ GUI_APP_MAIN
 	DUMP("A");
 
 	FourAxisDlg dlg;
-
 	DUMP("B");
 
 	LoadFromFile(dlg);

@@ -4,6 +4,7 @@ struct GCode {
 	Stream&  out;
 	Pt       lpos, rpos;
 	int      speed;
+	String   nx, ny, nz, na;
 	
 	void Put(const String& s) { out.PutLine(s); }
 
@@ -31,7 +32,7 @@ void GCode::To(Pt l, Pt r)
 		String ly = GFormat(ld.y);
 		String rx = GFormat(rd.x);
 		String ry = GFormat(rd.y);
-		Put(String() << "G1X" << lx << "Y" << ly << "Z" << rx << "A" << ry << "F" << speed);
+		Put(String() << "G1" << nx << lx << ny << ly << nz << rx << na << ry << "F" << speed);
 	}
 	lpos = l;
 	rpos = r;
@@ -40,9 +41,14 @@ void GCode::To(Pt l, Pt r)
 const char *begin_source_tag = ";<<<source>>>";
 const char *end_source_tag = ";>>>source<<<";
 
-void FourAxisDlg::SaveGCode(Stream& out, double inverted)
+void FourAxisDlg::SaveGCode(Stream& out, double inverted, bool mirrored)
 {
 	GCode gcode(out, ~speed);
+	
+	gcode.nx = settings.x;
+	gcode.ny = settings.y;
+	gcode.nz = settings.z;
+	gcode.na = settings.a;
 	
 	gcode.Put("G21");
 	gcode.Put("G17");
@@ -56,46 +62,70 @@ void FourAxisDlg::SaveGCode(Stream& out, double inverted)
 		gcode.To(cnc[0][i], cnc[1][i]);
 }
 
+String FourAxisDlg::Save0(const char *path)
+{
+	FileOut out(path);
+	
+	if(!out)
+		return String().Cat() << "Unable to open \1" << path;
+
+	SaveGCode(out, Null, false);
+	out.PutLine("");
+	String s = Base64Encode(MakeSave());
+	out.PutLine(begin_source_tag);
+	while(s.GetCount()) {
+		int n = min(s.GetCount(), 78);
+		out.PutLine(';' + s.Mid(0, n));
+		s.Remove(0, n);
+	}
+	out.PutLine(end_source_tag);
+	out.PutLine("");
+
+	out.Close();
+	if(out.IsError())
+		return String().Cat() << "Error writing \1" << path;
+		
+	if(save_inverted) {
+		String ipath = path;
+		String ext = GetFileExt(ipath);
+		ipath.Trim(ipath.GetCount() - ext.GetCount());
+		ipath << ".inverted" << ext;
+		FileOut iout(ipath);
+		if(!iout)
+			return String().Cat() << "Unable to open \1" << ipath;
+		SaveGCode(iout, GetInvertY(), false);
+		iout.Close();
+		if(iout.IsError())
+			return String().Cat() << "Error writing \1" << ipath;
+	}
+
+	if(save_mirrored) {
+		String ipath = path;
+		String ext = GetFileExt(ipath);
+		ipath.Trim(ipath.GetCount() - ext.GetCount());
+		ipath << ".mirrored" << ext;
+		FileOut iout(ipath);
+		if(!iout)
+			return String().Cat() << "Unable to open \1" << ipath;
+		SaveGCode(iout, Null, true);
+		iout.Close();
+		if(iout.IsError())
+			return String().Cat() << "Error writing \1" << ipath;
+	}
+	
+	return Null;
+}
+
 bool FourAxisDlg::Save(const char *path)
 {
 	if(!Accept())
 		return false;
 
-	FileOut out(path);
+	String e = Save0(path);
+	if(IsNull(e))
+		return true;
 
-	if(out) {
-		SaveGCode(out, Null);
-		out.PutLine("");
-		String s = Base64Encode(MakeSave());
-		out.PutLine(begin_source_tag);
-		while(s.GetCount()) {
-			int n = min(s.GetCount(), 78);
-			out.PutLine(';' + s.Mid(0, n));
-			s.Remove(0, n);
-		}
-		out.PutLine(end_source_tag);
-		out.PutLine("");
-
-		out.Close();
-		
-		if(!out.IsError()) {
-			if(save_inverted) {
-				String ipath = path;
-				String ext = GetFileExt(ipath);
-				ipath.Trim(ipath.GetCount() - ext.GetCount());
-				ipath << ".inverted" << ext;
-				FileOut iout(ipath);
-				SaveGCode(iout, GetInvertY());
-				iout.Close();
-				if(!iout.IsError())
-					return true;
-			}
-			else
-				return true;
-		}
-	}
-
-	Exclamation("Error while saving the file.");
+	Exclamation(e);
 	return false;
 }
 
@@ -110,8 +140,6 @@ String FourAxisDlg::MakeSave()
 	if(IsTapered())
 		m("taper", CurrentShape(true).Save())
 		 ("panel_width", (double)~panel_width)
-		 ("tower_distance", (double)~tower_distance)
-		 ("left_gap", (double)~left_gap)
 		;
 	return AsJSON(m);
 }
@@ -156,8 +184,6 @@ bool FourAxisDlg::Load(const char *path)
 			Type();
 			CurrentShape(true).Load(h);
 			panel_width <<= m["panel_width"];
-			tower_distance <<= m["tower_distance"];
-			left_gap <<= m["left_gap"];
 		}
 	}
 	catch(ValueTypeError) {

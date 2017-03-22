@@ -84,7 +84,7 @@ void NormalizeSegments(Vector<Pt>& path)
 	}
 }
 
-void FourAxisDlg::MakePaths(Vector<Pt> *shape, Vector<Pt> *path, Vector<Pt> *cnc, double inverted)
+void FourAxisDlg::MakePaths(Vector<Pt> *shape, Vector<Pt> *path, Vector<Pt> *cnc, double inverted, bool mirrored)
 {
 	for(int r = 0; r < 1 + IsTapered(); r++) {
 		Vector<Pt>& p = shape[r];
@@ -107,7 +107,14 @@ void FourAxisDlg::MakePaths(Vector<Pt> *shape, Vector<Pt> *path, Vector<Pt> *cnc
 		}
 		else
 			p.Clear();
-		path[r] = GetKerfPath(p, GetKerf(r));
+	}
+	
+	if(mirrored)
+		Swap(shape[0], shape[1]);
+		
+	for(int r = 0; r < 1 + IsTapered(); r++) {
+		Vector<Pt>& p = shape[r];
+		path[r] = GetKerfPath(p, GetKerf(mirrored ? !r : r));
 		NormalizeSegments(path[r]);
 	}
 
@@ -116,8 +123,10 @@ void FourAxisDlg::MakePaths(Vector<Pt> *shape, Vector<Pt> *path, Vector<Pt> *cnc
 		cnc[1].Add(Pointf(0, 0));
 		MixAll(path[0], path[1], cnc[0], cnc[1]);
 		if(cnc[0].GetCount() == cnc[1].GetCount()) {
-			CncPath(cnc[0], cnc[1], Nvl((double)~panel_width),
-			        Nvl((double)~tower_distance), Nvl((double)~left_gap));
+			double panel = Nvl((double)~panel_width);
+			CncPath(cnc[0], cnc[1], panel,
+			        settings.left + settings.width + settings.right,
+			        mirrored ? settings.left + settings.width - panel : settings.left);
 			if(!IsOk(cnc[0]))
 				cnc[0].Clear();
 			if(!IsOk(cnc[1]))

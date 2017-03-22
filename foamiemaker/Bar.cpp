@@ -12,6 +12,8 @@ void FourAxisDlg::SetBar()
 				if(lrufile.GetCount())
 					lrufile(bar, THISFN(OpenFile));
 				bar.Separator();
+				bar.Add("CNC setup..", [=] { CncSetup(); });
+				bar.Separator();
 				bar.Add("Exit", [=] { Exit(); }).Key(K_ALT_F4);
 		});
 	});

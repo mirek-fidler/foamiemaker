@@ -14,6 +14,7 @@ file
 	View.cpp,
 	Bar.cpp,
 	File.cpp,
+	Setup.cpp,
 	main.cpp,
 	dlg.lay,
 	HotImg.iml,
@@ -28,6 +29,7 @@ file
 	Wing.cpp,
 	FusePlan.cpp,
 	FuseProfile.cpp,
+	Tail.cpp,
 	Motor.cpp,
 	TextPath.cpp;
 
