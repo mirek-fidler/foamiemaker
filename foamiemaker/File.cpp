@@ -57,7 +57,7 @@ void FourAxisDlg::SaveGCode(Stream& out, double inverted, bool mirrored)
 	Vector<Pt> shape[2];
 	Vector<Pt> path[2];
 	Vector<Pt> cnc[2];
-	MakePaths(shape, path, cnc, inverted);
+	MakePaths(shape, path, cnc, inverted, mirrored);
 	for(int i = 0; i < cnc[0].GetCount(); i++)
 		gcode.To(cnc[0][i], cnc[1][i]);
 }
@@ -136,10 +136,15 @@ String FourAxisDlg::MakeSave()
 	 ("data", CurrentShape().Save())
 	 ("kerf", (double)~kerf)
 	 ("feed", (double)~speed)
+	 ("save_inverted", (bool)~save_inverted)
+	 ("save_mirrored", (bool)~save_mirrored)
 	;
+	if(save_inverted)
+		m("invert_y", ~invert_y);
 	if(IsTapered())
 		m("taper", CurrentShape(true).Save())
 		 ("panel_width", (double)~panel_width)
+		 ("right_kerf", (double)~right_kerf)
 		;
 	return AsJSON(m);
 }
@@ -178,12 +183,16 @@ bool FourAxisDlg::Load(const char *path)
 		CurrentShape().Load(m["data"]);
 		kerf <<= m["kerf"];
 		speed <<= m["feed"];
+		save_inverted <<= m["save_inverted"];
+		save_mirrored <<= m["save_mirrored"];
+		invert_y <<= m["invert_y"];
 		Value h = m["taper"];
 		if(!IsNull(h) && CurrentShape().IsTaperable()) {
 			tapered <<= true;
 			Type();
 			CurrentShape(true).Load(h);
 			panel_width <<= m["panel_width"];
+			right_kerf <<= m["right_kerf"];
 		}
 	}
 	catch(ValueTypeError) {
