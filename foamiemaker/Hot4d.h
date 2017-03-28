@@ -146,7 +146,7 @@ bool DoSpars(Path& r, const Vector<Pt>& foil, int& i, Vector<Spar>& spars);
 void ReadSpar(Vector<Spar>& spar, int kind, double le, Ctrl& pos, Ctrl& cx, Ctrl& cy, Ctrl& circle);
 
 enum {
-	TAPERABLE = 1, INVERTABLE = 2,
+	TAPERABLE = 1, INVERTABLE = 2
 };
 
 struct Shape : ParentCtrl {

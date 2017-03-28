@@ -60,28 +60,13 @@ Vector<Pt> KerfCompensation(const Vector<Pt>& in0, double kerf)
 		if(angle > M_PI - 0.001 && angle < M_PI + 0.001) // Almost straight line, just use k1
 			path << k1.Attr(p1);
 		else
-		if(angle < M_PI) {
-			if(SquaredDistance(p1, c) > 5 * kerf * kerf)
-				path << k1.Attr(p1)
-				     << Pt(k1 + Unit(k1 - k0) * 2 * kerf).Attr(p1)
-				     << Pt(k2 + Unit(k2 - k3) * 2 * kerf).Attr(p1)
-				     << k2.Attr(p1);
-			else
-				path << c.Attr(p1);
-		}
-		else {
-			if(sin(angle / 2) * min(Distance(p0, p1), Distance(p1, p2)) < kerf)
-				path << Pt(kerf * axis + p1).Attr(p1);
-			else
-			if(SquaredDistance(p1, c) > 1.3 * 1.3 * kerf * kerf) {
-				path << c.Attr(p1);
-				if(p1.sharp)
-					path << Pt(kerf * axis + p1).Attr(p1);
-				path << c.Attr(p1);
-			}
-			else
-				path << c.Attr(p1);
-		}
+		if(SquaredDistance(p1, c) > 5 * kerf * kerf)
+			path << k1.Attr(p1)
+			     << Pt(k1 + Unit(k1 - k0) * 2 * kerf).Attr(p1)
+			     << Pt(k2 + Unit(k2 - k3) * 2 * kerf).Attr(p1)
+			     << k2.Attr(p1);
+		else
+			path << c.Attr(p1);
 	}
 	if(k3 != in.Top())
 		path << k3.Attr(p2);

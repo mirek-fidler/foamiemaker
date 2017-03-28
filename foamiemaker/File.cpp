@@ -135,6 +135,7 @@ String FourAxisDlg::MakeSave()
 	m("type", CurrentShape().GetId())
 	 ("data", CurrentShape().Save())
 	 ("kerf", (double)~kerf)
+	 ("negative_kerf", (bool)~negative_kerf)
 	 ("feed", (double)~speed)
 	 ("save_inverted", (bool)~save_inverted)
 	 ("save_mirrored", (bool)~save_mirrored)
@@ -182,6 +183,7 @@ bool FourAxisDlg::Load(const char *path)
 		Type();
 		CurrentShape().Load(m["data"]);
 		kerf <<= m["kerf"];
+		negative_kerf <<= m["negative_kerf"];
 		speed <<= m["feed"];
 		save_inverted <<= m["save_inverted"];
 		save_mirrored <<= m["save_mirrored"];
