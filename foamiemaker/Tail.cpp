@@ -4,50 +4,39 @@ Path Tail::Get()
 {
 	Path r;
 	
-	Pt start = MakePoint(x, y);
-	
-	double hy = Nvl((double)~head_y, start.y);
-	double ty = Nvl((double)~tail_y, start.y);
-	
-	Sizef dim = MakePoint(cx, top_cy);
-	double bcy = Nvl((double)~bottom_cy);
-	
-	Vector<Pt> foil[2];
+	Vector<Pt> shape;
 
-	double head[2], tail[2];
-	head[0] = Nvl((double)~top_head_cy);
-	tail[0] = Nvl((double)~top_tail_cy);
-	head[1] = Nvl((double)~bottom_head_cy);
-	tail[1] = Nvl((double)~bottom_tail_cy);
+	shape.Add(MakePoint(0, top_y1));
+	shape.Add(MakePoint(top_x, top_y1));
+
+	Pointf c = MakePoint(middle_x, middle_y);
+	double h2 = Nvl((double)~middle_height) / 2;
 	
-	for(int bottom = 0; bottom < 2; bottom++) {
-		Vector<Pt>& f = foil[bottom];
-		f = GetHalfFoil(airfoil.Get(), bottom);
-		double ay = GetMaxY(f, bottom ? -1 : 1);
-		if(ay)
-			ay = (bottom ? bcy : dim.cy) / ay;
-		Mul(f, 1, ay);
-		CutHalfFoil(f, head[bottom], tail[bottom]);
-		Mul(f, f.GetCount() ? dim.cx / f.Top().x : 0, bottom ? -1 : 1);
+	Pointf top = MakePoint(top_x, top_y2);
+	Sizef radius = Sizef(top.x - c.x, top.y - c.y - h2);
+	for(int i = 0; i <= 30; i++) {
+		double angle = M_PI_2 * i / 30;
+		double sina = sin(angle);
+		double cosa = cos(angle);
+		shape.Add(Pointf(top.x - radius.cx * sina, c.y + h2 + radius.cy * cosa));
 	}
 	
-	Reverse(foil[1]);
+	Pointf bottom = MakePoint(bottom_x, bottom_y1);
+	radius = Sizef(bottom.x - c.x, c.y - h2 - bottom.y);
 
-	r.To(0, start.y + ty);
-	r.Offset(start.x, start.y);
-	
-	Vector<Pt> shape;
-	shape.Add(Pt(0, ty));
-	for(int bottom = 0; bottom < 2; bottom++)
-		for(Pt p : foil[bottom]) {
-			p.y += p.x / dim.cx * (hy - ty) + ty;
-			shape.Add(p);
-		}
-	shape.Add(Pt(0, ty));
+	for(int i = 30; i >= 0; i--) {
+		double angle = M_PI_2 * i / 30;
+		double sina = sin(angle);
+		double cosa = cos(angle);
+		shape.Add(Pointf(bottom.x - radius.cx * sina, c.y - h2 - radius.cy * cosa));
+	}
+
+	shape.Add(MakePoint(bottom_x, bottom_y2));
+	shape.Add(MakePoint(0, bottom_y2));
 	
 	if(saddle) {
 		Vector<Pt> sa = saddle_airfoil.Get();
-		Reverse(sa);
+//		Reverse(sa);
 		InvertX(sa);
 		if(sa.GetCount())
 			sa.Add(sa[0]);
@@ -92,8 +81,8 @@ Path Tail::Get()
 		}
 		
 		if(dosaddle) {
-			Pt ms0(-start.x / 2, ty);
-			Pt ms(-start.x / 2, spos.y);
+			Pt ms0(-c.x / 2, 0);
+			Pt ms(-c.x / 2, spos.y);
 			sa.Insert(0, ms0);
 			sa.Insert(1, ms);
 			sa.Add(ms);
@@ -112,18 +101,20 @@ Path Tail::Get()
 			r.Kerf(shape[i]);
 	}
 
-	r.Identity();
-	r.Kerf(0, start.y + ty);
-
 	return r;
 }
 
 Tail::Tail()
 {
 	CtrlLayout(*this);
-	
-	y <<= 25;
-	head_y <<= 0;
-	tail_y <<= 0;
-	x <<= 10;
+
+	top_x <<= 30;
+	top_y1 <<= 30;
+	top_y2 <<= 27;
+	middle_x <<= 10;
+	middle_y <<= 15;
+	middle_height <<= 0;
+	bottom_x <<= 30;
+	bottom_y1 <<= 4;
+	bottom_y2 <<= 2;
 }

@@ -41,7 +41,9 @@ void Path::Offset(double x, double y)
 
 double FourAxisDlg::GetKerf(bool right)
 {
-	return (negative_kerf ? -1 : 1) * Nvl(double(right ? ~right_kerf : ~kerf), Nvl((double)~kerf));
+	return (CurrentShape().GetInfo() & NEGATIVE_KERF ? -1 : 1) *
+	       (negative_kerf ? -1 : 1) *
+	       Nvl(double(right ? ~right_kerf : ~kerf), Nvl((double)~kerf));
 }
 
 Vector<Pt> GetKerfPath(const Vector<Pt>& path, double k)

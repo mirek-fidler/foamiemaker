@@ -1,5 +1,65 @@
 #include "Hot4d.h"
 
+int GetKerfAndSpeed(const Material& m, double taper, double& left_kerf, double& right_kerf, double& speed)
+{
+	double l_taper = -DBL_MAX;
+	double l_left_kerf = 0;
+	double l_right_kerf = 0;
+	double l_speed = 0;
+	
+	double h_taper = DBL_MAX;
+	double h_left_kerf = 0;
+	double h_right_kerf = 0;
+	double h_speed = 0;
+	
+	for(TaperParameters p : m.param) {
+		for(int pass = 0; pass < 2; pass++) {
+			double ptaper = p.left_length / p.right_length;
+			if(ptaper <= taper && ptaper > l_taper) {
+				l_taper = ptaper;
+				l_left_kerf = p.left_kerf;
+				l_right_kerf = p.right_kerf;
+				l_speed = p.speed;
+			}
+			if(ptaper >= taper && ptaper < h_taper) {
+				h_taper = ptaper;
+				h_left_kerf = p.left_kerf;
+				h_right_kerf = p.right_kerf;
+				h_speed = p.speed;
+			}
+			Swap(p.left_length, p.right_length);
+			Swap(p.left_kerf, p.right_kerf);
+		}
+	}
+	
+	if(l_taper == -DBL_MAX) {
+		if(h_taper == DBL_MAX) {
+			left_kerf = right_kerf = 0;
+			speed = 140;
+			return 2;
+		}
+		
+		left_kerf = h_left_kerf;
+		right_kerf = h_right_kerf;
+		speed = h_speed;
+		return 1;
+	}
+	
+	if(h_taper == DBL_MAX) {
+		left_kerf = l_left_kerf;
+		right_kerf = l_right_kerf;
+		speed = l_speed;
+		return 1;
+	}
+
+	double k = abs(h_taper - l_taper) <= 0.001 ? 0 : (taper - l_taper) / (h_taper - l_taper);
+	left_kerf = (1 - k) * l_left_kerf + k * h_left_kerf;
+	right_kerf = (1 - k) * l_right_kerf + k * h_right_kerf;
+	speed = (1 - k) * l_speed + k * h_speed;
+
+	return 0;
+}
+
 bool IsNaN(Pt p)
 {
 	return IsNaN(p.x) || IsNaN(p.y);

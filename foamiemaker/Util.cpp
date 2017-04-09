@@ -43,6 +43,11 @@ Pt MakePoint(Ctrl& a, Ctrl& b)
 	return Pt(Nvl((double)~a), Nvl((double)~b));
 }
 
+Pt MakePoint(double a, Ctrl& b)
+{
+	return Pt(a, Nvl((double)~b));
+}
+
 double LineIntersectionT(Pt a1, Pt a2, Pt b1, Pt b2)
 {
 	Pt s1 = a2 - a1;

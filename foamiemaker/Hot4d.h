@@ -13,6 +13,23 @@ using namespace Upp;
 #define IMAGEFILE <FoamieMaker/HotImg.iml>
 #include <Draw/iml_header.h>
 
+struct TaperParameters {
+	double left_length;
+	double left_kerf;
+	double right_length;
+	double right_kerf;
+	double speed;
+	
+	void Jsonize(JsonIO& io);
+};
+
+struct Material {
+	String name;
+	Array<TaperParameters> param;
+
+	void Jsonize(JsonIO& io);
+};
+
 struct Settings {
 	double left;
 	double width;
@@ -25,6 +42,8 @@ struct Settings {
 	String y;
 	String z;
 	String a;
+	
+	Array<Material> material;
 	
 	void Jsonize(JsonIO& io);
 	
@@ -56,6 +75,7 @@ void SetValues(Ctrl& parent, const ValueMap& json);
 ValueMap GetValues(Ctrl& parent);
 
 Pt MakePoint(Ctrl& a, Ctrl& b);
+Pt MakePoint(double a, Ctrl& b);
 
 double LineIntersectionT(Pt a1, Pt a2, Pt b1, Pt b2);
 Pt LineIntersection(Pt a1, Pt a2, Pt b1, Pt b2);
@@ -91,6 +111,8 @@ void MixAll(const Vector<Pt>& left, const Vector<Pt>& right,
 void CncPath(Vector<Pt>& left, Vector<Pt>& right, double width, double tower_distance, double left_distance);
 
 Rectf GetBounds(const Vector<Pt>& path);
+
+int GetKerfAndSpeed(const Material& m, double taper, double& left_kerf, double& right_kerf, double& speed);
 
 Vector<Pt> KerfCompensation(const Vector<Pt>& in0, double kerf);
 
@@ -146,7 +168,7 @@ bool DoSpars(Path& r, const Vector<Pt>& foil, int& i, Vector<Spar>& spars);
 void ReadSpar(Vector<Spar>& spar, int kind, double le, Ctrl& pos, Ctrl& cx, Ctrl& cy, Ctrl& circle);
 
 enum {
-	TAPERABLE = 1, INVERTABLE = 2
+	TAPERABLE = 1, INVERTABLE = 2, NEGATIVE_KERF = 4,
 };
 
 struct Shape : ParentCtrl {
@@ -157,6 +179,7 @@ struct Shape : ParentCtrl {
 	virtual String   GetName() const = 0;
 	virtual void     AddPoint(Pt& p) {}
 	virtual dword    GetInfo() const { return 0; }
+	virtual double   GetWidth() const { return 1; }
 	
 	bool    IsTaperable() const { return GetInfo() & TAPERABLE; }
 	bool    IsInvertable() const { return GetInfo() & INVERTABLE; }
@@ -186,9 +209,10 @@ struct FourAxisDlg;
 
 struct Rod : WithRodLayout<Shape> {
 	virtual Path     Get();
-	virtual String   GetId() const   { return "rod"; }
-	virtual String   GetName() const { return "Rod"; }
-	virtual dword    GetInfo() const { return TAPERABLE; }
+	virtual String   GetId() const    { return "rod"; }
+	virtual String   GetName() const  { return "Rod"; }
+	virtual dword    GetInfo() const  { return TAPERABLE; }
+	virtual double   GetWidth() const { return Nvl((double)~rect_x) + Nvl((double)~rect_y); }
 
 	SparsCtrl   spars;
 
@@ -224,9 +248,10 @@ struct Wing : WithWingLayout<Shape> {
 	SparsCtrl   spars;
 
 	virtual Path    Get();
-	virtual String  GetId() const   { return "wing"; }
-	virtual String  GetName() const { return "Wing panel"; }
-	virtual dword   GetInfo() const { return TAPERABLE|INVERTABLE; }
+	virtual String  GetId() const    { return "wing"; }
+	virtual String  GetName() const  { return "Wing panel"; }
+	virtual dword   GetInfo() const  { return TAPERABLE|INVERTABLE; }
+	virtual double  GetWidth() const { return Nvl((double)~width); }
 	
 	FourAxisDlg *dlg;
 	Wing        *other;
@@ -264,7 +289,7 @@ struct FuseProfile : WithFuseProfileLayout<Shape> {
 	FuseProfile();
 };
 
-struct Tail : WithFuseProfileLayout<Shape> {
+struct Tail : WithTailProfileLayout<Shape> {
 	typedef FuseProfile CLASSNAME;
 	
 	AirfoilCtrl airfoil, saddle_airfoil;
@@ -274,6 +299,7 @@ struct Tail : WithFuseProfileLayout<Shape> {
 	virtual Path    Get();
 	virtual String  GetId() const   { return "tailcut"; }
 	virtual String  GetName() const { return "Fuselage rod tail"; }
+	virtual dword   GetInfo() const { return NEGATIVE_KERF; }
 
 	Tail();
 };

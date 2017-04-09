@@ -210,6 +210,21 @@ void FourAxisDlg::Sync()
 			Vector<Pt> path[2];
 			Vector<Pt> cnc[2];
 			
+			if(settings.material.GetCount()) {
+				double left_kerf, right_kerf, speed;
+				double taper = 1;
+				if(IsTapered()) {
+					double z = CurrentShape(true).GetWidth();
+					if(z > 0.001)
+						taper = CurrentShape(false).GetWidth() / z;
+				}
+				int kc = GetKerfAndSpeed(settings.material[0], taper, left_kerf, right_kerf, speed);
+		        p.Text(origin.x + 20, 10,
+		               String().Cat() << "left kerf: " << left_kerf << ", right_kerf: " << right_kerf << ", speed: " << speed
+		               << ", code: " << kc,
+		               Arial(20).Bold()).Fill(Red());
+			}
+			
 			MakePaths(shape, path, cnc, show_inverted ? GetInvertY() : (double)Null, show_mirrored);
 
 			if(CncOutOfBounds(cnc))
