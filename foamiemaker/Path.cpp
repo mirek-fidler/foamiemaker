@@ -43,7 +43,7 @@ double FourAxisDlg::GetKerf(bool right)
 {
 	return (CurrentShape().GetInfo() & NEGATIVE_KERF ? -1 : 1) *
 	       (negative_kerf ? -1 : 1) *
-	       Nvl(double(right ? ~right_kerf : ~kerf), Nvl((double)~kerf));
+	       (right ? right_kerf : left_kerf);
 }
 
 Vector<Pt> GetKerfPath(const Vector<Pt>& path, double k)
@@ -86,8 +86,25 @@ void NormalizeSegments(Vector<Pt>& path)
 	}
 }
 
-void FourAxisDlg::MakePaths(Vector<Pt> *shape, Vector<Pt> *path, Vector<Pt> *cnc, double inverted, bool mirrored)
+void FourAxisDlg::MakePaths(double inverted, bool mirrored)
 {
+	String n = ~material;
+	left_kerf = right_kerf = 0;
+	speed = 140;
+	kcode = 3;
+	for(const auto& m : settings.material) {
+		if(m.name == n) {
+			double taper = 1;
+			if(IsTapered()) {
+				double z = CurrentShape(true).GetWidth();
+				if(z > 0.001)
+					taper = CurrentShape(false).GetWidth() / z;
+			}
+			kcode = GetKerfAndSpeed(m, taper, left_kerf, right_kerf, speed);
+			break;
+		}
+	}
+	
 	for(int r = 0; r < 1 + IsTapered(); r++) {
 		Vector<Pt>& p = shape[r];
 		shape[r] = CurrentShape(r).Get();

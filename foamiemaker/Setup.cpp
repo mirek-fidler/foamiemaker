@@ -182,12 +182,6 @@ bool CNCSetupDlg::Perform(Settings& settings)
 	return true;
 }
 
-void FourAxisDlg::CncSetup()
-{
-	if(CNCSetupDlg().Perform(settings))
-		StoreAsJsonFile(settings, ConfigFile("cnc.json"), true);
-}
-
 void TaperParameters::Jsonize(JsonIO& io)
 {
 	io
@@ -235,4 +229,12 @@ Settings::Settings()
 	y = "Y";
 	z = "Z";
 	a = "A";
+}
+
+void FourAxisDlg::CncSetup()
+{
+	if(CNCSetupDlg().Perform(settings)) {
+		StoreAsJsonFile(settings, ConfigFile("cnc.json"), true);
+		SyncMaterial();
+	}
 }

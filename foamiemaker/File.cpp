@@ -43,7 +43,9 @@ const char *end_source_tag = ";>>>source<<<";
 
 void FourAxisDlg::SaveGCode(Stream& out, double inverted, bool mirrored)
 {
-	GCode gcode(out, ~speed);
+	MakePaths(inverted, mirrored);
+
+	GCode gcode(out, int(speed));
 	
 	gcode.nx = settings.x;
 	gcode.ny = settings.y;
@@ -54,10 +56,6 @@ void FourAxisDlg::SaveGCode(Stream& out, double inverted, bool mirrored)
 	gcode.Put("G17");
 	gcode.Put("G91");
 
-	Vector<Pt> shape[2];
-	Vector<Pt> path[2];
-	Vector<Pt> cnc[2];
-	MakePaths(shape, path, cnc, inverted, mirrored);
 	for(int i = 0; i < cnc[0].GetCount(); i++)
 		gcode.To(cnc[0][i], cnc[1][i]);
 }
@@ -134,18 +132,16 @@ String FourAxisDlg::MakeSave()
 	ValueMap m;
 	m("type", CurrentShape().GetId())
 	 ("data", CurrentShape().Save())
-	 ("kerf", (double)~kerf)
 	 ("negative_kerf", (bool)~negative_kerf)
-	 ("feed", (double)~speed)
 	 ("save_inverted", (bool)~save_inverted)
 	 ("save_mirrored", (bool)~save_mirrored)
+	 ("material", ~material)
 	;
 	if(save_inverted)
 		m("invert_y", ~invert_y);
 	if(IsTapered())
 		m("taper", CurrentShape(true).Save())
 		 ("panel_width", (double)~panel_width)
-		 ("right_kerf", (double)~right_kerf)
 		;
 	return AsJSON(m);
 }
@@ -175,18 +171,17 @@ bool FourAxisDlg::Load(const char *path)
 	}
 	try {
 		Value m = ParseJSON(Base64Decode(src));
-		int q = shape.Find(m["type"]);
+		int q = shapes.Find(m["type"]);
 		if(q < 0)
 			return false;
 		filepath = path;
 		type <<= q;
 		Type();
 		CurrentShape().Load(m["data"]);
-		kerf <<= m["kerf"];
 		negative_kerf <<= m["negative_kerf"];
-		speed <<= m["feed"];
 		save_inverted <<= m["save_inverted"];
 		save_mirrored <<= m["save_mirrored"];
+		material <<= m["material"];
 		invert_y <<= m["invert_y"];
 		Value h = m["taper"];
 		if(!IsNull(h) && CurrentShape().IsTaperable()) {
@@ -194,7 +189,6 @@ bool FourAxisDlg::Load(const char *path)
 			Type();
 			CurrentShape(true).Load(h);
 			panel_width <<= m["panel_width"];
-			right_kerf <<= m["right_kerf"];
 		}
 	}
 	catch(ValueTypeError) {

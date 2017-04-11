@@ -6,7 +6,7 @@
 
 void FourAxisDlg::AddShape(Shape *l, Shape *r)
 {
-	shape.Add(l->GetId(), MakeTuple(l, r));
+	shapes.Add(l->GetId(), MakeTuple(l, r));
 	type.Add(type.GetCount(), l->GetName());
 	left.Add(*l);
 	if(r)
@@ -41,8 +41,6 @@ FourAxisDlg::FourAxisDlg()
 
 	panel_width <<= 500;
 	
-	speed <<= 140;
-	
 	for(auto i : { 1, 2, 3, 5, 10, 20, 30, 50, 100, 200, 500, 1000 })
 		scale.Add(i, AsString(i) + " pixels / mm");
 	scale <<= 5;
@@ -71,31 +69,31 @@ FourAxisDlg::FourAxisDlg()
 	for(Ctrl *q = GetFirstChild(); q; q = q->GetNext())
 		*q << [=] { Sync(); };
 
-	for(int i = 0; i < shape.GetCount(); i++) {
-		shape[i].a->WhenAction << [=] { Sync(); };
-		for(Ctrl *q = shape[i].a->GetFirstChild(); q; q = q->GetNext())
+	for(int i = 0; i < shapes.GetCount(); i++) {
+		shapes[i].a->WhenAction << [=] { Sync(); };
+		for(Ctrl *q = shapes[i].a->GetFirstChild(); q; q = q->GetNext())
 			*q << [=] { Sync(); };
-		if(shape[i].b) {
-			shape[i].b->WhenAction << [=] { Sync(); };
-			for(Ctrl *q = shape[i].b->GetFirstChild(); q; q = q->GetNext())
+		if(shapes[i].b) {
+			shapes[i].b->WhenAction << [=] { Sync(); };
+			for(Ctrl *q = shapes[i].b->GetFirstChild(); q; q = q->GetNext())
 				*q << [=] { Sync(); };
 		}
 	}
 
-	kerf.NullText("0");
-	
 	Type();
 	
 	Sizeable().Zoomable();
 	
 	StoreRevision();
+	
+	SyncMaterial();
 }
 
 Shape& FourAxisDlg::CurrentShape0(bool right) const
 {
 	int q = ~type;
-	if(q < 0 || q >= shape.GetCount()) return const_cast<Rod&>(rod[0]);
-	auto t = shape[~type];
+	if(q < 0 || q >= shapes.GetCount()) return const_cast<Rod&>(rod[0]);
+	auto t = shapes[~type];
 	return t.a->IsTaperable() && tapered && right ? *t.b : *t.a;
 }
 
@@ -111,8 +109,8 @@ const Shape& FourAxisDlg::CurrentShape(bool right) const
 
 void FourAxisDlg::Type()
 {
-	for(int i = 0; i < shape.GetCount(); i++) {
-		auto t = shape[i];
+	for(int i = 0; i < shapes.GetCount(); i++) {
+		auto t = shapes[i];
 		bool b = ~type == i;
 		t.a->Show(b);
 		if(t.a->IsTaperable())
@@ -123,10 +121,8 @@ void FourAxisDlg::Type()
 	bool b = tapered;
 
 	panel_width_lbl.Show(b);
-	right_kerf_lbl.Show(b);
 
 	panel_width.Show(b);
-	right_kerf.Show(b);
 	
 	show_left.Show(b);
 	show_right.Show(b);
@@ -134,6 +130,15 @@ void FourAxisDlg::Type()
 	show_planform.Show(b);
 
 	Sync();
+}
+
+void FourAxisDlg::SyncMaterial()
+{
+	material.ClearList();
+	for(const auto& m : settings.material)
+		material.Add(m.name);
+	if(IsNull(material))
+		material.GoBegin();
 }
 
 bool FourAxisDlg::Key(dword key, int count)

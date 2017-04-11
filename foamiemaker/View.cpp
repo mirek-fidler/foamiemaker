@@ -204,28 +204,14 @@ void FourAxisDlg::Sync()
 		p.Clip();
 	
 		if(ok) {
-			double k = Nvl((double)~kerf);
-			
-			Vector<Pt> shape[2];
-			Vector<Pt> path[2];
-			Vector<Pt> cnc[2];
-			
+			MakePaths(show_inverted ? GetInvertY() : (double)Null, show_mirrored);
+
 			if(settings.material.GetCount()) {
-				double left_kerf, right_kerf, speed;
-				double taper = 1;
-				if(IsTapered()) {
-					double z = CurrentShape(true).GetWidth();
-					if(z > 0.001)
-						taper = CurrentShape(false).GetWidth() / z;
-				}
-				int kc = GetKerfAndSpeed(settings.material[0], taper, left_kerf, right_kerf, speed);
 		        p.Text(origin.x + 20, 10,
 		               String().Cat() << "left kerf: " << left_kerf << ", right_kerf: " << right_kerf << ", speed: " << speed
-		               << ", code: " << kc,
+		               << ", code: " << kcode,
 		               Arial(20).Bold()).Fill(Red());
 			}
-			
-			MakePaths(shape, path, cnc, show_inverted ? GetInvertY() : (double)Null, show_mirrored);
 
 			if(CncOutOfBounds(cnc))
 		        p.Text(origin.x + 20, 10, "CNC path is out of bounds!", Arial(20).Bold()).Fill(Red());

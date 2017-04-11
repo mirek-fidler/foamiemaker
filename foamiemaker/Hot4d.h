@@ -371,7 +371,13 @@ struct FourAxisDlg : WithFourAxisLayout<TopWindow> {
 	
 	LRUList lrufile;
 
-	VectorMap<String, Tuple<Shape *, Shape *>> shape;
+	VectorMap<String, Tuple<Shape *, Shape *>> shapes;
+
+	double     left_kerf, right_kerf, speed;
+	int        kcode;
+	Vector<Pt> shape[2];
+	Vector<Pt> path[2];
+	Vector<Pt> cnc[2];
 
 private:
 	Shape& CurrentShape0(bool right) const;
@@ -392,6 +398,7 @@ public:
 	void   Zoom(int dir, Point p);
 	void   Home()                       { org = Pt(0, 0); Sync(); }
 	void   Type();
+	void   SyncMaterial();
 	void   Sync();
 	void   PaintPath(Painter& p, const Vector<Pt>& path, double scale, Color color,
 	                 bool dashed = false, Color kerf_color = Null, double kerf = 0);
@@ -424,7 +431,7 @@ public:
 	void   CncSetup();
 
 	double     GetKerf(bool right);
-	void       MakePaths(Vector<Pt> *shape, Vector<Pt> *path, Vector<Pt> *cnc, double inverted = Null, bool mirrored = false);
+	void       MakePaths(double inverted = Null, bool mirrored = false);
 	
 	String MakeSave();
 
