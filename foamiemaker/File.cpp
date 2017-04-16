@@ -55,9 +55,10 @@ void FourAxisDlg::SaveGCode(Stream& out, double inverted, bool mirrored)
 	gcode.Put("G21");
 	gcode.Put("G17");
 	gcode.Put("G91");
-
-	for(int i = 0; i < cnc[0].GetCount(); i++)
-		gcode.To(cnc[0][i], cnc[1][i]);
+	
+	if(cnc[0].GetCount() == cnc[1].GetCount())
+		for(int i = 0; i < cnc[0].GetCount(); i++)
+			gcode.To(cnc[0][i], cnc[1][i]);
 }
 
 String FourAxisDlg::Save0(const char *path)

@@ -35,13 +35,24 @@ Path Tail::Get()
 	shape.Add(MakePoint(0, bottom_y2));
 	
 	if(saddle) {
-		Vector<Pt> sa = saddle_airfoil.Get();
-//		Reverse(sa);
-		InvertX(sa);
-		if(sa.GetCount())
-			sa.Add(sa[0]);
+		Vector<Pt> sa;
 		double sch = Nvl((double)~saddle_chord);
-		Mul(sa, sch, sch);
+		if(saddle_isairfoil) {
+			sa = saddle_airfoil.Get();
+			InvertX(sa);
+			Mul(sa, sch, sch);
+			if(sa.GetCount())
+				sa.Add(sa[0]);
+		}
+		else {
+			double h = Nvl((double)~saddle_height, 0.0);
+			sa.Add(Pt(0, 0));
+			sa.Add(Pt(0, h / 2));
+			sa.Add(Pt(sch, h / 2));
+			sa.Add(Pt(sch, -h / 2));
+			sa.Add(Pt(0, -h / 2));
+			sa.Add(Pt(0, 0));
+		}
 		double angle = -Nvl((double)~saddle_incidence);
 		if(angle) {
 			angle = M_2PI * angle / 360;

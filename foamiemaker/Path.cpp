@@ -88,6 +88,12 @@ void NormalizeSegments(Vector<Pt>& path)
 
 void FourAxisDlg::MakePaths(double inverted, bool mirrored)
 {
+	for(int i = 0; i < 2; i++) {
+		shape[i].Clear();
+		path[i].Clear();
+		cnc[i].Clear();
+	}
+
 	String n = ~material;
 	left_kerf = right_kerf = 0;
 	speed = 140;
