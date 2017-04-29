@@ -206,17 +206,19 @@ void FourAxisDlg::Sync()
 		if(ok) {
 			MakePaths(show_inverted ? GetInvertY() : (double)Null, show_mirrored);
 
-			if(settings.material.GetCount()) {
-		        p.Text(origin.x + 20, 10,
-		               String().Cat() << "left kerf: " << left_kerf << ", right_kerf: " << right_kerf << ", speed: " << speed
-		               << ", code: " << kcode,
-		               Arial(20).Bold()).Fill(Red());
-			}
-
 			if(CncOutOfBounds(cnc))
 		        p.Text(origin.x + 20, 10, "CNC path is out of bounds!", Arial(20).Bold()).Fill(Red());
 
 			bool show[2];
+
+			Font fnt = Arial(13);
+
+			if(settings.material.GetCount()) {
+				String txt = String().Cat() << "left kerf: " << left_kerf << ", right_kerf: " << right_kerf << ", speed: " << speed
+		               << ", code: " << kcode;
+				Size tsz = GetTextSize(txt, fnt);
+		        p.Text(isz.cx - tsz.cx - 2 * tsz.cy, tsz.cy, txt, fnt).Fill(Magenta());
+			}
 			
 			if(IsTapered()) {
 				show[0] = show_left;
@@ -228,7 +230,6 @@ void FourAxisDlg::Sync()
 					double width = Nvl((double)~panel_width);
 					
 					if(!IsNull(l) && !IsNull(r) && width > 0) {
-						Font fnt = Arial(13);
 						Size tsz = GetTextSize("99999 dm", fnt);
 						double x = isz.cx - tsz.cx - width;
 						double h = max(l.left, l.right, r.left, r.right);
