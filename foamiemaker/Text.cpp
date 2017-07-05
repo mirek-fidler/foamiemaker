@@ -57,6 +57,29 @@ void HGlyphPainter::CloseOp()
 		Line(move);
 }
 
+struct GlyphMaker : PainterTarget {
+	Vector<float>       glyph;
+	double              tolerance;
+	Pointf              pos, move;
+
+	virtual void Line(const Pointf& p);
+	virtual void Move(const Pointf& p);
+};
+
+void GlyphMaker::Move(const Pointf& p)
+{
+	glyph.Add((float)1e31);
+	Line(p);
+	move = pos;
+}
+
+void GlyphMaker::Line(const Pointf& p)
+{
+	glyph.Add((float)p.x);
+	glyph.Add((float)p.y);
+	pos = p;
+}
+
 struct GlyphKey {
 	Font   fnt;
 	int    chr;
@@ -75,12 +98,17 @@ struct sHMakeGlyph : LRUCache<Value, GlyphKey>::Maker {
 
 	GlyphKey Key() const     { return gk; }
 	int      Make(Value& v) const {
-		HGlyphPainter gp;
+/*		HGlyphPainter gp;
 		gp.move = gp.pos = Null;
 		gp.tolerance = gk.tolerance;
-		PaintCharacter(gp, Pointf(0, 0), gk.chr, gk.fnt);
-		int sz = gp.glyph.GetCount() * 4;
-		v = RawPickToValue(pick(gp.glyph));
+		PaintCharacter(gp, Pointf(0, 0), gk.chr, gk.fnt);*/
+		
+		GlyphMaker m;
+		BufferPainter iw(m);
+		iw.Character(0, 0, gk.chr, gk.fnt).Fill(Black());
+
+		int sz = m.glyph.GetCount() * 4;
+		v = RawPickToValue(pick(m.glyph));
 		return sz;
 	}
 };

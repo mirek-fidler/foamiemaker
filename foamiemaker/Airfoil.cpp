@@ -2,33 +2,76 @@
 
 void AirfoilCtrl::DoAction()
 {
-	SelectFileIn in("*.dat");
-	if(!in)
+	String path = SelectFileOpen("*.dat *.svg");
+	if(IsNull(path))
 		return;
-	
-	String name = TrimBoth(in.GetLine());
-	
+
+	String name;
 	ValueArray va;
-	
-	while(!in.IsEof()) {
-		String ln = in.GetLine();
-		CParser p(ln);
-		Pt pt = Null;
-		try {
-			pt.x = p.ReadDouble();
-			pt.y = p.ReadDouble();
+
+	if(GetFileExt(path) == ".svg") {
+		struct FoilMaker : PainterTarget {
+			Rectf bounds = Null;
+			Vector<Pointf> path;
+			
+			virtual void Line(const Pointf& p) {
+				path.Add(p);
+				if(IsNull(bounds))
+					bounds = Rect(p, p);
+				else
+					bounds.Union(p);
+			}
+			virtual void Move(const Pointf& p) { Line(p); }
+		};
+		
+		FoilMaker m;
+		BufferPainter iw(m);
+		RenderSVG(iw, LoadFile(path));
+		
+		DDUMP(m.path.GetCount());
+		
+		if(m.path.GetCount() > 10000) {
+			Exclamation("Path is too complex");
+			return;
 		}
-		catch(CParser::Error) {
-			pt = Null;
-		}
-		if(!IsNull(pt)) {
+
+		double scale = 1 / m.bounds.Width();
+		for(Pointf p : m.path) {
 			Value h;
-			h("x") = pt.x;
-			h("y") = pt.y;
+			h("x") = scale * (p.x - m.bounds.left);
+			h("y") = scale * (p.y - m.bounds.top);
 			va.Add(h);
 		}
-	}
 	
+		name = GetFileTitle(path);
+	}
+	else {
+		FileIn in(path);
+		if(!in)
+			return;
+
+		name = TrimBoth(in.GetLine());
+		
+		while(!in.IsEof()) {
+			String ln = in.GetLine();
+			CParser p(ln);
+			Pointf pt = Null;
+			try {
+				pt.x = p.ReadDouble();
+				pt.y = p.ReadDouble();
+			}
+			catch(CParser::Error) {
+				pt = Null;
+			}
+			if(!IsNull(pt)) {
+				Value h;
+				h("x") = pt.x;
+				h("y") = pt.y;
+				va.Add(h);
+			}
+		}
+	}
+
 	Value h;
 	h("name") = name;
 	h("data") = va;
