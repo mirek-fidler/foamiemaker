@@ -8,9 +8,9 @@ void FourAxisDlg::AddShape(Shape *l, Shape *r)
 {
 	shapes.Add(l->GetId(), MakeTuple(l, r));
 	type.Add(type.GetCount(), l->GetName());
-	left.Add(*l);
+	left.Add(l->SizePos());
 	if(r)
-		right.Add(*r);
+		right.Add(r->SizePos());
 }
 
 

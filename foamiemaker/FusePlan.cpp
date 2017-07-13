@@ -25,8 +25,10 @@ Path FusePlan::Get()
 	r.Kerf(start);
 	r.Offset(start.x, start.y);
 
+	Vector<Spar> sp = spars.Get();
 	for(int i = 0; i < foil.GetCount(); i++)
-		r.Kerf(foil[i]);
+		if(!DoSpars(r, foil, i, sp))
+			r.Kerf(foil[i]);
 
 	double x = dim.cx;
 	for(int i = 0; i < list.GetCount(); i++) {

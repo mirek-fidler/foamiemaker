@@ -185,6 +185,8 @@ struct Shape : ParentCtrl {
 	bool    IsInvertable() const { return GetInfo() & INVERTABLE; }
 	
 	void SyncView();
+	
+	Shape() { SizePos(); }
 };
 
 struct AirfoilCtrl : public DataPusher {
@@ -264,6 +266,8 @@ struct FusePlan : WithFusePlanLayout<Shape> {
 	typedef FusePlan CLASSNAME;
 	
 	AirfoilCtrl airfoil;
+
+	SparsCtrl spars;
 
 	virtual Path    Get();
 	virtual String  GetId() const   { return "fuseplan"; }

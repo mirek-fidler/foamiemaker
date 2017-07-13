@@ -28,8 +28,6 @@ void AirfoilCtrl::DoAction()
 		BufferPainter iw(m);
 		RenderSVG(iw, LoadFile(path));
 		
-		DDUMP(m.path.GetCount());
-		
 		if(m.path.GetCount() > 10000) {
 			Exclamation("Path is too complex");
 			return;

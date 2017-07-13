@@ -131,6 +131,19 @@ void FourAxisDlg::Sync()
 {
 	Title(filepath);
 	
+	Size sz = GetSize();
+	int m = view.GetRect().left;
+	
+	if(CurrentShape().IsTaperable()) {
+		left.LeftPos(m, sz.cx / 2 - m);
+		right.Show();
+		right.LeftPos(sz.cx / 2 + m / 2, sz.cx / 2 - m);
+	}
+	else {
+		left.LeftPos(m, sz.cx - 2 * m);
+		right.Hide();
+	}
+	
 	org.x = min(org.x, 0);
 	org.y = max(org.y, 0);
 
