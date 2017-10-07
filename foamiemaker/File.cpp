@@ -43,6 +43,7 @@ const char *end_source_tag = ";>>>source<<<";
 
 void FourAxisDlg::SaveGCode(Stream& out, double inverted, bool mirrored)
 {
+
 	MakePaths(inverted, mirrored);
 
 	GCode gcode(out, int(speed));
