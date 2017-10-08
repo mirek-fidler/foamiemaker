@@ -14,6 +14,7 @@ void FourAxisDlg::AddShape(Shape *l, Shape *r)
 }
 
 
+
 FourAxisDlg::FourAxisDlg()
 {
 	CtrlLayout(*this, "4 axis CNC G-code generator for RC modelling");

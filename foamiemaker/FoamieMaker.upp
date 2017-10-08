@@ -13,6 +13,7 @@ file
 	Path.cpp,
 	View.cpp,
 	Bar.cpp,
+	test.cpp,
 	File.cpp,
 	Setup.cpp,
 	main.cpp,
