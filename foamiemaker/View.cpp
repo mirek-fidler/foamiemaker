@@ -165,8 +165,8 @@ void FourAxisDlg::Sync()
 		
 		ImagePainter p(isz);
 
-// TODO: bug in preclip
-//		p.PreClip();
+// TODO: bug in preclip (?)
+		p.PreClip();
 	
 		p.Translate(0.5, 0.5);
 		p.Clear(White());
