@@ -98,10 +98,12 @@ struct sHMakeGlyph : LRUCache<Value, GlyphKey>::Maker {
 
 	GlyphKey Key() const     { return gk; }
 	int      Make(Value& v) const {
-/*		HGlyphPainter gp;
+	#if 0
+		HGlyphPainter gp;
 		gp.move = gp.pos = Null;
 		gp.tolerance = gk.tolerance;
-		PaintCharacter(gp, Pointf(0, 0), gk.chr, gk.fnt);*/
+		PaintCharacter(gp, Pointf(0, 0), gk.chr, gk.fnt);
+	#endif
 		
 		GlyphMaker m;
 		BufferPainter iw(m);
